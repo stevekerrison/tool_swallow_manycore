@@ -44,7 +44,7 @@ config = []
 for x in configrows:
 	config.append(map(int,x.strip().split(' ')))
 
-print config
+#print config
 
 #Boards are 4x4 nodes
 xboardnodes = 4
@@ -61,24 +61,38 @@ zbits = int(math.ceil(math.log(xboards)/math.log(2)))
 boardbits = xbits + yboardbits
 totalbits = boardbits+ybits+zbits
 
-print xbits,yboardbits
-print ybits,zbits
+#print xbits,yboardbits
+#print ybits,zbits
 
 def calcdirs(lst,data,width,dirs):
 	for b in range(width):
 		lst.append(dirs[(data >> b) & 1])
-		
+
 
 for y in range(yboards):
 	for z in range(xboards):
+		print "#new board"
 		if config[y][z] != 1:
 			print >> sys.stderr, "ERROR:",sys.argv[0], "does not yet support non-rectangular board arrangements"
 			sys.exit(2)
-		print y,z
+		#print y,z
 		for c in range(boardnodes):
 			nodeid = c | (y << boardbits) | (z << (boardbits + ybits))
 			route = []
-			print ("{0:0%db}" % (totalbits)).format(nodeid)
+			jtagnode = 0 #TODO: Sort this shit out
+			"""if c < 4:
+				jtagnode = jtagmap[c] + (y * 3)
+			elif c < 8:
+			elif c < 12:
+			else:
+				
+			if c < 8:
+				jtagnode = jtagmap[c] + (z * 8) + (y * 16)
+			else:
+				jtagnode = (jtagmap[c]-8) + ((xboards-1)*8) + ((xboards-z) * 8) + (y * 16)"""
+			print
+			print "JTAG Node = ",jtagnode
+			print hex(nodereg),"=",hex(nodeid),("\t#0b{0:0%db}" % totalbits).format(nodeid)
 			calcdirs(route,nodeid,xbits,xmap[nodeid&((xbits**2)-1)])
 			calcdirs(route,nodeid>>xbits,yboardbits,ymap[nodeid&((xbits**2)-1)])
 			calcdirs(route,nodeid>>(xbits+yboardbits),ybits,ymap[nodeid&((xbits**2)-1)])
@@ -89,14 +103,22 @@ for y in range(yboards):
 				'b': dirmap[linkmap[nodeid&((xbits**2)-1)]['b']],	\
 				'efgh': dirmap[linkmap[nodeid&((xbits**2)-1)]['efgh']]	\
 			}
-			route.reverse()
-			directions.reverse()
 			for links in linkdir:
 				for l in links:
 					print hex(linkregs[l]),"=",hex(linkdir[links]<<dirpos)
+			dirregs = [0,0]
+			dirregspos = 0
+			for k,d in enumerate(directions):
+				dirregs[dirregspos] |= directions[k]<<(k*dirwidth)
+				if k == 7:
+					diregspos += 1
+			for k,d in enumerate(dirregs):
+				print hex(dirreg+k),"=",hex(d)
+			"""route.reverse()
+			directions.reverse()
 			print route
 			print directions
-			print linkdir
+			print linkdir"""
 			#print jtagmap[c] * y
 #print "{0:0%db}" % (xbits+ybits+zbits)
 
