@@ -1,15 +1,44 @@
 #!/usr/bin/python
 
+header = \
+"""xmp16-routegen.py
+
+A script for generating routing tables, link settings and JTAG mappings for the
+XMP16 UoB development board.
+
+Author: Steve Kerrison <steve.kerrison@bristol.ac.uk>
+Created: 11th May 2012
+
+Accepts one argument in the form of a matlab-style matrix definition, where a
+'1' signifies a board and a '0' does not. From this the network dimensions are
+calculated. This is currently a redundant format due to it only supporting
+rectangular board arrangements! Maybe in the future it'll be more flexible, but
+it's not likely to need it in the mean time.
+
+Example for a 2x2 mesh of boards: ./xmp16-routegen.py "1 1; 1 1"
+Example for a 2x3 mesh of boards: ./xmp16-routegen.py "1 1 1;1 1 1"
+"""
 import sys,math
 
+if len(sys.argv) != 2:
+	print >> sys.stderr, header
+	sys.exit(1)
 
-
+#Description of a single board's JTAG map
 jtagmap = [ 		\
 	3, 2, 4, 5, 	\
 	1, 0, 6, 7, 	\
 	15, 14, 8, 9, 	\
 	13, 12, 10, 11	\
 ]
+#How the board's JTAG quadrants are broken down
+nodequadrants = [	\
+	0, 0, 1, 1,		\
+	0, 0, 1, 1,		\
+	3, 3, 2, 2,		\
+	3, 3, 2, 2
+]
+
 dirmap = { 			\
 	'left':0,'right':1, 	\
 	'up':2,'down':3,	\
@@ -68,30 +97,45 @@ def calcdirs(lst,data,width,dirs):
 	for b in range(width):
 		lst.append(dirs[(data >> b) & 1])
 
+def calcjtag(y,z,c):
+	n = nodequadrants[c]
+	if n == 0:
+		if y == 0 and z == 0:
+			blocksbefore = 0
+		elif z == 0:
+			blocksbefore = (2*yboards*(((xboards-1)*2)+1)) + ((yboards-1-y)*2) + 2
+		else:
+			blocksbefore = (2*y*(((xboards-1)*2)+1))+(z*2)
+	elif n == 1:
+		blocksbefore = (2*y*(((xboards-1)*2)+1))+(z*2)+1
+	elif n == 2:
+		blocksbefore = (2*y*(((xboards-1)*2)+1))+((xboards-1)*2)+((xboards-1-z)*2)+2
+	else:
+		if z == 0:
+			blocksbefore = (2*yboards*(((xboards-1)*2)+1)) + ((yboards-1-y)*2) + 1
+		else:
+			blocksbefore = (2*y*(((xboards-1)*2)+1))+((xboards-1)*2)+((xboards-1-z)*2)+3
+	offset = n * 4
+	#print "c:",c
+	#print "bb:",blocksbefore
+	return (blocksbefore * 4) + jtagmap[c] - offset
+
+
 
 for y in range(yboards):
 	for z in range(xboards):
-		print "#new board"
 		if config[y][z] != 1:
 			print >> sys.stderr, "ERROR:",sys.argv[0], "does not yet support non-rectangular board arrangements"
 			sys.exit(2)
 		#print y,z
+		print
+		print "#new board"
 		for c in range(boardnodes):
 			nodeid = c | (y << boardbits) | (z << (boardbits + ybits))
 			route = []
-			jtagnode = "x" #TODO: Sort this shit out
-			"""if c < 4:
-				jtagnode = jtagmap[c] + (y * 3)
-			elif c < 8:
-			elif c < 12:
-			else:
-				
-			if c < 8:
-				jtagnode = jtagmap[c] + (z * 8) + (y * 16)
-			else:
-				jtagnode = (jtagmap[c]-8) + ((xboards-1)*8) + ((xboards-z) * 8) + (y * 16)"""
+			jtagnode = calcjtag(y,z,c)
 			print
-			print "JTAG Node = ",jtagnode
+			print "JTAG Node =",jtagnode
 			print hex(nodereg),"=",hex(nodeid),("\t#0b{0:0%db}" % totalbits).format(nodeid)
 			calcdirs(route,nodeid,xbits,xmap[nodeid&((xbits**2)-1)])
 			calcdirs(route,nodeid>>xbits,yboardbits,ymap[nodeid&((xbits**2)-1)])
@@ -111,14 +155,7 @@ for y in range(yboards):
 			for k,d in enumerate(directions):
 				dirregs[dirregspos] |= directions[k]<<(k*dirwidth)
 				if k == 7:
-					diregspos += 1
+					dirregspos += 1
 			for k,d in enumerate(dirregs):
 				print hex(dirreg+k),"=",hex(d)
-			"""route.reverse()
-			directions.reverse()
-			print route
-			print directions
-			print linkdir"""
-			#print jtagmap[c] * y
-#print "{0:0%db}" % (xbits+ybits+zbits)
 
