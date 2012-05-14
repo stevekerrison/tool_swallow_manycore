@@ -1,0 +1,30 @@
+Application id number: 0x00000000
+Application id string: "".
+stdcore[0] (node "Master", core 0) stack usage,  upper bound: 208
+stdcore[0] (node "Master", core 0) program size,  upper bound: 1328
+stdcore[0] (node "Master", core 0) free memory,  lower bound: 64000
+stdcore[0] (node "Master", core 0) thread usage,  upper bound: 1
+stdcore[0] (node "Master", core 0) unused threads,  lower bound: 7
+stdcore[0] (node "Master", core 0) timer count,  upper bound: 1
+stdcore[0] (node "Master", core 0) unused timers,  lower bound: 9
+stdcore[0] (node "Master", core 0) channel end usage,  upper bound: 0
+stdcore[0] (node "Master", core 0) unused channel ends,  lower bound: 32
+ (node "Slave", core 0) stack usage,  upper bound: 208
+ (node "Slave", core 0) program size,  upper bound: 1068
+ (node "Slave", core 0) free memory,  lower bound: 64260
+ (node "Slave", core 0) thread usage,  upper bound: 1
+ (node "Slave", core 0) unused threads,  lower bound: 7
+ (node "Slave", core 0) timer count,  upper bound: 1
+ (node "Slave", core 0) unused timers,  lower bound: 9
+ (node "Slave", core 0) channel end usage,  upper bound: 0
+ (node "Slave", core 0) unused channel ends,  lower bound: 32
+stdcore[0] (node "Master", core 0) uses port XS1_PORT_4F
+ (node "Slave", core 0) uses port XS1_PORT_4D
+Node "Master" routing id =  0x0000
+Node "Master" PLL configuration register value =  0x00002700
+Node "Master" reference clock divider register value =  0x00000003
+Node "Master" system frequency (Hz) =  400000000
+Node "Slave" routing id =  0x8000
+Node "Slave" PLL configuration register value =  0x00002700
+Node "Slave" reference clock divider register value =  0x00000003
+Node "Slave" system frequency (Hz) =  400000000

@@ -1,0 +1,647 @@
+<XSystem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="XSystem.xsd">
+  <System>
+    <Nodes>
+      <Node number="0" jtagId="0x2633" userId="0x00000000" processorMhz="400" interconnectMhz="400" referenceMhz="100">
+        <Switch sLinks="16"/>
+        <Processor number="0" numThreads="8" numTimers="10" numLocks="4" numSyncs="7" numChanEnds="32" numClkBlks="6" codeReference="stdcore[0]">
+          <MemoryController>
+            <Ram base="0x10000" size="0x10000"/>
+          </MemoryController>
+        </Processor>
+      </Node>
+      <Node number="32768" jtagId="0x2633" userId="0x00000000" processorMhz="400" interconnectMhz="400" referenceMhz="100">
+        <Switch sLinks="16"/>
+        <Processor number="0" numThreads="8" numTimers="10" numLocks="4" numSyncs="7" numChanEnds="32" numClkBlks="6" codeReference="stdcore[1]">
+          <MemoryController>
+            <Ram base="0x10000" size="0x10000"/>
+          </MemoryController>
+        </Processor>
+      </Node>
+    </Nodes>
+    <Connections>
+      <PLink width="9" pLink="0,0,0" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="0,0,1" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="0,0,2" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="0,0,3" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="32768,0,0" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="32768,0,1" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="32768,0,2" outBufferBytes="16" inBufferBytes="16"/>
+      <PLink width="9" pLink="32768,0,3" outBufferBytes="16" inBufferBytes="16"/>
+      <SLink width="9" end1="0,1" end2="32768,2" outBufferBytes="16" inBufferBytes="16"/>
+    </Connections>
+    <JtagChain>
+      <Node id="0"/>
+      <Node id="32768"/>
+    </JtagChain>
+    <Pins>
+      <Pin name="Master-pkg:X0D00" number="0">
+        <Port bitNum="0" core="0" name="XS1_PORT_1A" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D01" number="1">
+        <Port bitNum="0" core="0" name="XS1_PORT_1B" node="0" priority="0"/>
+        <XLink bitNum="4" dir="out" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D02" number="2">
+        <Port bitNum="0" core="0" name="XS1_PORT_4A" node="0" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="20" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="3" dir="out" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D03" number="3">
+        <Port bitNum="1" core="0" name="XS1_PORT_4A" node="0" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="21" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="2" dir="out" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D04" number="4">
+        <Port bitNum="0" core="0" name="XS1_PORT_4B" node="0" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="22" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="1" dir="out" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D05" number="5">
+        <Port bitNum="1" core="0" name="XS1_PORT_4B" node="0" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="23" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="0" dir="out" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D06" number="6">
+        <Port bitNum="2" core="0" name="XS1_PORT_4B" node="0" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="24" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="0" dir="in" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D07" number="7">
+        <Port bitNum="3" core="0" name="XS1_PORT_4B" node="0" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="25" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="1" dir="in" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D08" number="8">
+        <Port bitNum="2" core="0" name="XS1_PORT_4A" node="0" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="26" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="2" dir="in" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D09" number="9">
+        <Port bitNum="3" core="0" name="XS1_PORT_4A" node="0" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8A" node="0" priority="1"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="27" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="3" dir="in" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D10" number="10">
+        <Port bitNum="0" core="0" name="XS1_PORT_1C" node="0" priority="0"/>
+        <XLink bitNum="4" dir="in" node="0" number="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D11" number="11">
+        <Port bitNum="0" core="0" name="XS1_PORT_1D" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D12" number="12">
+        <Port bitNum="0" core="0" name="XS1_PORT_1E" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D13" number="13">
+        <Port bitNum="0" core="0" name="XS1_PORT_1F" node="0" priority="0"/>
+        <XLink bitNum="4" dir="out" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D14" number="14">
+        <Port bitNum="0" core="0" name="XS1_PORT_4C" node="0" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="8" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="28" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="3" dir="out" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D15" number="15">
+        <Port bitNum="1" core="0" name="XS1_PORT_4C" node="0" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="9" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="29" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="2" dir="out" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D16" number="16">
+        <Port bitNum="0" core="0" name="XS1_PORT_4D" node="0" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="10" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <XLink bitNum="1" dir="out" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D17" number="17">
+        <Port bitNum="1" core="0" name="XS1_PORT_4D" node="0" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="11" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <XLink bitNum="0" dir="out" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D18" number="18">
+        <Port bitNum="2" core="0" name="XS1_PORT_4D" node="0" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="12" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <XLink bitNum="0" dir="in" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D19" number="19">
+        <Port bitNum="3" core="0" name="XS1_PORT_4D" node="0" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="13" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <XLink bitNum="1" dir="in" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D20" number="20">
+        <Port bitNum="2" core="0" name="XS1_PORT_4C" node="0" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="14" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="30" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="2" dir="in" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D21" number="21">
+        <Port bitNum="3" core="0" name="XS1_PORT_4C" node="0" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8B" node="0" priority="1"/>
+        <Port bitNum="15" core="0" name="XS1_PORT_16A" node="0" priority="2"/>
+        <Port bitNum="31" core="0" name="XS1_PORT_32A" node="0" priority="3"/>
+        <XLink bitNum="3" dir="in" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D22" number="22">
+        <Port bitNum="0" core="0" name="XS1_PORT_1G" node="0" priority="0"/>
+        <XLink bitNum="4" dir="in" node="0" number="3"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D23" number="23">
+        <Port bitNum="0" core="0" name="XS1_PORT_1H" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D24" number="24">
+        <Port bitNum="0" core="0" name="XS1_PORT_1I" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D25" number="25">
+        <Port bitNum="0" core="0" name="XS1_PORT_1J" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D26" number="26">
+        <Port bitNum="0" core="0" name="XS1_PORT_4E" node="0" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D27" number="27">
+        <Port bitNum="1" core="0" name="XS1_PORT_4E" node="0" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D28" number="28">
+        <Port bitNum="0" core="0" name="XS1_PORT_4F" node="0" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D29" number="29">
+        <Port bitNum="1" core="0" name="XS1_PORT_4F" node="0" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D30" number="30">
+        <Port bitNum="2" core="0" name="XS1_PORT_4F" node="0" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D31" number="31">
+        <Port bitNum="3" core="0" name="XS1_PORT_4F" node="0" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D32" number="32">
+        <Port bitNum="2" core="0" name="XS1_PORT_4E" node="0" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D33" number="33">
+        <Port bitNum="3" core="0" name="XS1_PORT_4E" node="0" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8C" node="0" priority="1"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D34" number="34">
+        <Port bitNum="0" core="0" name="XS1_PORT_1K" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D35" number="35">
+        <Port bitNum="0" core="0" name="XS1_PORT_1L" node="0" priority="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D36" number="36">
+        <Port bitNum="0" core="0" name="XS1_PORT_1M" node="0" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8D" node="0" priority="1"/>
+        <Port bitNum="8" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D37" number="37">
+        <Port bitNum="0" core="0" name="XS1_PORT_1N" node="0" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8D" node="0" priority="1"/>
+        <Port bitNum="9" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D38" number="38">
+        <Port bitNum="0" core="0" name="XS1_PORT_1O" node="0" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8D" node="0" priority="1"/>
+        <Port bitNum="10" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D39" number="39">
+        <Port bitNum="0" core="0" name="XS1_PORT_1P" node="0" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8D" node="0" priority="1"/>
+        <Port bitNum="11" core="0" name="XS1_PORT_16B" node="0" priority="2"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D40" number="40">
+        <Port bitNum="4" core="0" name="XS1_PORT_8D" node="0" priority="0"/>
+        <Port bitNum="12" core="0" name="XS1_PORT_16B" node="0" priority="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D41" number="41">
+        <Port bitNum="5" core="0" name="XS1_PORT_8D" node="0" priority="0"/>
+        <Port bitNum="13" core="0" name="XS1_PORT_16B" node="0" priority="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D42" number="42">
+        <Port bitNum="6" core="0" name="XS1_PORT_8D" node="0" priority="0"/>
+        <Port bitNum="14" core="0" name="XS1_PORT_16B" node="0" priority="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D43" number="43">
+        <Port bitNum="7" core="0" name="XS1_PORT_8D" node="0" priority="0"/>
+        <Port bitNum="15" core="0" name="XS1_PORT_16B" node="0" priority="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D49" number="44">
+        <Port bitNum="0" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="4" dir="out" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D50" number="45">
+        <Port bitNum="1" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="3" dir="out" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D51" number="46">
+        <Port bitNum="2" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="2" dir="out" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D52" number="47">
+        <Port bitNum="3" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="1" dir="out" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D53" number="48">
+        <Port bitNum="4" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="0" dir="out" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D54" number="49">
+        <Port bitNum="5" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="0" dir="in" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D55" number="50">
+        <Port bitNum="6" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="1" dir="in" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D56" number="51">
+        <Port bitNum="7" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="2" dir="in" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D57" number="52">
+        <Port bitNum="8" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="3" dir="in" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D58" number="53">
+        <Port bitNum="9" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="4" dir="in" node="0" number="0"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D61" number="54">
+        <Port bitNum="10" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="4" dir="out" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D62" number="55">
+        <Port bitNum="11" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="3" dir="out" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D63" number="56">
+        <Port bitNum="12" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="2" dir="out" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D64" number="57">
+        <Port bitNum="13" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="1" dir="out" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D65" number="58">
+        <Port bitNum="14" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="0" dir="out" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D66" number="59">
+        <Port bitNum="15" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="0" dir="in" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D67" number="60">
+        <Port bitNum="16" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="1" dir="in" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D68" number="61">
+        <Port bitNum="17" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="2" dir="in" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D69" number="62">
+        <Port bitNum="18" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="3" dir="in" node="0" number="1"/>
+      </Pin>
+      <Pin name="Master-pkg:X0D70" number="63">
+        <Port bitNum="19" core="0" name="XS1_PORT_32A" node="0" priority="0"/>
+        <XLink bitNum="4" dir="in" node="0" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D00" number="64">
+        <Port bitNum="0" core="0" name="XS1_PORT_1A" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D01" number="65">
+        <Port bitNum="0" core="0" name="XS1_PORT_1B" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="out" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D02" number="66">
+        <Port bitNum="0" core="0" name="XS1_PORT_4A" node="32768" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="20" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="3" dir="out" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D03" number="67">
+        <Port bitNum="1" core="0" name="XS1_PORT_4A" node="32768" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="21" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="2" dir="out" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D04" number="68">
+        <Port bitNum="0" core="0" name="XS1_PORT_4B" node="32768" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="22" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="1" dir="out" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D05" number="69">
+        <Port bitNum="1" core="0" name="XS1_PORT_4B" node="32768" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="23" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="0" dir="out" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D06" number="70">
+        <Port bitNum="2" core="0" name="XS1_PORT_4B" node="32768" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="24" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="0" dir="in" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D07" number="71">
+        <Port bitNum="3" core="0" name="XS1_PORT_4B" node="32768" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="25" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="1" dir="in" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D08" number="72">
+        <Port bitNum="2" core="0" name="XS1_PORT_4A" node="32768" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="26" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="2" dir="in" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D09" number="73">
+        <Port bitNum="3" core="0" name="XS1_PORT_4A" node="32768" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8A" node="32768" priority="1"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="27" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="3" dir="in" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D10" number="74">
+        <Port bitNum="0" core="0" name="XS1_PORT_1C" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="in" node="32768" number="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D11" number="75">
+        <Port bitNum="0" core="0" name="XS1_PORT_1D" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D12" number="76">
+        <Port bitNum="0" core="0" name="XS1_PORT_1E" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D13" number="77">
+        <Port bitNum="0" core="0" name="XS1_PORT_1F" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="out" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D14" number="78">
+        <Port bitNum="0" core="0" name="XS1_PORT_4C" node="32768" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="8" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="28" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="3" dir="out" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D15" number="79">
+        <Port bitNum="1" core="0" name="XS1_PORT_4C" node="32768" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="9" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="29" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="2" dir="out" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D16" number="80">
+        <Port bitNum="0" core="0" name="XS1_PORT_4D" node="32768" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="10" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <XLink bitNum="1" dir="out" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D17" number="81">
+        <Port bitNum="1" core="0" name="XS1_PORT_4D" node="32768" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="11" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <XLink bitNum="0" dir="out" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D18" number="82">
+        <Port bitNum="2" core="0" name="XS1_PORT_4D" node="32768" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="12" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <XLink bitNum="0" dir="in" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D19" number="83">
+        <Port bitNum="3" core="0" name="XS1_PORT_4D" node="32768" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="13" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <XLink bitNum="1" dir="in" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D20" number="84">
+        <Port bitNum="2" core="0" name="XS1_PORT_4C" node="32768" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="14" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="30" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="2" dir="in" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D21" number="85">
+        <Port bitNum="3" core="0" name="XS1_PORT_4C" node="32768" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8B" node="32768" priority="1"/>
+        <Port bitNum="15" core="0" name="XS1_PORT_16A" node="32768" priority="2"/>
+        <Port bitNum="31" core="0" name="XS1_PORT_32A" node="32768" priority="3"/>
+        <XLink bitNum="3" dir="in" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D22" number="86">
+        <Port bitNum="0" core="0" name="XS1_PORT_1G" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="in" node="32768" number="3"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D23" number="87">
+        <Port bitNum="0" core="0" name="XS1_PORT_1H" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D24" number="88">
+        <Port bitNum="0" core="0" name="XS1_PORT_1I" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D25" number="89">
+        <Port bitNum="0" core="0" name="XS1_PORT_1J" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D26" number="90">
+        <Port bitNum="0" core="0" name="XS1_PORT_4E" node="32768" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D27" number="91">
+        <Port bitNum="1" core="0" name="XS1_PORT_4E" node="32768" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D28" number="92">
+        <Port bitNum="0" core="0" name="XS1_PORT_4F" node="32768" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D29" number="93">
+        <Port bitNum="1" core="0" name="XS1_PORT_4F" node="32768" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D30" number="94">
+        <Port bitNum="2" core="0" name="XS1_PORT_4F" node="32768" priority="0"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="4" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D31" number="95">
+        <Port bitNum="3" core="0" name="XS1_PORT_4F" node="32768" priority="0"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="5" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D32" number="96">
+        <Port bitNum="2" core="0" name="XS1_PORT_4E" node="32768" priority="0"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="6" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D33" number="97">
+        <Port bitNum="3" core="0" name="XS1_PORT_4E" node="32768" priority="0"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_8C" node="32768" priority="1"/>
+        <Port bitNum="7" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D34" number="98">
+        <Port bitNum="0" core="0" name="XS1_PORT_1K" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D35" number="99">
+        <Port bitNum="0" core="0" name="XS1_PORT_1L" node="32768" priority="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D36" number="100">
+        <Port bitNum="0" core="0" name="XS1_PORT_1M" node="32768" priority="0"/>
+        <Port bitNum="0" core="0" name="XS1_PORT_8D" node="32768" priority="1"/>
+        <Port bitNum="8" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D37" number="101">
+        <Port bitNum="0" core="0" name="XS1_PORT_1N" node="32768" priority="0"/>
+        <Port bitNum="1" core="0" name="XS1_PORT_8D" node="32768" priority="1"/>
+        <Port bitNum="9" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D38" number="102">
+        <Port bitNum="0" core="0" name="XS1_PORT_1O" node="32768" priority="0"/>
+        <Port bitNum="2" core="0" name="XS1_PORT_8D" node="32768" priority="1"/>
+        <Port bitNum="10" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D39" number="103">
+        <Port bitNum="0" core="0" name="XS1_PORT_1P" node="32768" priority="0"/>
+        <Port bitNum="3" core="0" name="XS1_PORT_8D" node="32768" priority="1"/>
+        <Port bitNum="11" core="0" name="XS1_PORT_16B" node="32768" priority="2"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D40" number="104">
+        <Port bitNum="4" core="0" name="XS1_PORT_8D" node="32768" priority="0"/>
+        <Port bitNum="12" core="0" name="XS1_PORT_16B" node="32768" priority="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D41" number="105">
+        <Port bitNum="5" core="0" name="XS1_PORT_8D" node="32768" priority="0"/>
+        <Port bitNum="13" core="0" name="XS1_PORT_16B" node="32768" priority="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D42" number="106">
+        <Port bitNum="6" core="0" name="XS1_PORT_8D" node="32768" priority="0"/>
+        <Port bitNum="14" core="0" name="XS1_PORT_16B" node="32768" priority="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D43" number="107">
+        <Port bitNum="7" core="0" name="XS1_PORT_8D" node="32768" priority="0"/>
+        <Port bitNum="15" core="0" name="XS1_PORT_16B" node="32768" priority="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D49" number="108">
+        <Port bitNum="0" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="out" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D50" number="109">
+        <Port bitNum="1" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="3" dir="out" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D51" number="110">
+        <Port bitNum="2" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="2" dir="out" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D52" number="111">
+        <Port bitNum="3" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="1" dir="out" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D53" number="112">
+        <Port bitNum="4" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="0" dir="out" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D54" number="113">
+        <Port bitNum="5" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="0" dir="in" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D55" number="114">
+        <Port bitNum="6" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="1" dir="in" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D56" number="115">
+        <Port bitNum="7" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="2" dir="in" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D57" number="116">
+        <Port bitNum="8" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="3" dir="in" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D58" number="117">
+        <Port bitNum="9" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="in" node="32768" number="0"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D61" number="118">
+        <Port bitNum="10" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="out" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D62" number="119">
+        <Port bitNum="11" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="3" dir="out" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D63" number="120">
+        <Port bitNum="12" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="2" dir="out" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D64" number="121">
+        <Port bitNum="13" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="1" dir="out" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D65" number="122">
+        <Port bitNum="14" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="0" dir="out" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D66" number="123">
+        <Port bitNum="15" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="0" dir="in" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D67" number="124">
+        <Port bitNum="16" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="1" dir="in" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D68" number="125">
+        <Port bitNum="17" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="2" dir="in" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D69" number="126">
+        <Port bitNum="18" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="3" dir="in" node="32768" number="1"/>
+      </Pin>
+      <Pin name="Slave-pkg:X0D70" number="127">
+        <Port bitNum="19" core="0" name="XS1_PORT_32A" node="32768" priority="0"/>
+        <XLink bitNum="4" dir="in" node="32768" number="1"/>
+      </Pin>
+    </Pins>
+  </System>
+</XSystem>
