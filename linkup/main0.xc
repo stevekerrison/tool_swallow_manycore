@@ -34,8 +34,16 @@ void __initlinks()
 	write_sswitch_reg(myid,XS1_L_SSWITCH_DIMENSION_DIRECTION0_NUM,0);
 	write_sswitch_reg(myid,XS1_L_SSWITCH_DIMENSION_DIRECTION1_NUM,0);
 	write_sswitch_reg(myid,XLINK_D_DN,0);
-	write_sswitch_reg(myid,XLINK_D_STW,0x80002004);
-	read_sswitch_reg(myid,XLINK_D_STW,tv);
+	write_sswitch_reg(myid,XLINK_D_STW,0x81802004);
+	write_sswitch_reg(myid,XLINK_E_STW,0x00002004);
+	write_sswitch_reg(myid,XLINK_F_STW,0x00002004);
+	write_sswitch_reg(myid,XLINK_G_STW,0x00002004);
+	write_sswitch_reg(myid,XLINK_H_STW,0x00002004);
+	read_sswitch_reg(1,XS1_L_SSWITCH_NODE_ID_NUM,tv);
+	printf("%d: 0x%08x\n",myid,tv);
+	read_sswitch_reg(0,XS1_L_SSWITCH_NODE_ID_NUM,tv);
+	printf("%d: 0x%08x\n",myid,tv);
+	/*read_sswitch_reg(myid,XLINK_D_STW,tv);
 	printf("%d: 0x%08x\n",myid,tv);
 	t :> tv;
 	tv += 100000000;
@@ -44,7 +52,7 @@ void __initlinks()
 	printf("%d: 0x%08x\n",myid,c);
 	asm("in %0,res[%1]":"=r"(c):"r"(tv));
 	printf("%08x\n",tv);
-	freeChanend(c);
+	freeChanend(c);*/
 }
 
 int main(void)
