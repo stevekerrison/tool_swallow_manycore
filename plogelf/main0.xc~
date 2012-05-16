@@ -13,6 +13,7 @@ void c0()
 		t when timerafter(tv) :> void;
 		ledc0 <: ledv;
 	}
+}
 
 
 int main()

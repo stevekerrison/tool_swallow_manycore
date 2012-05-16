@@ -1,6 +1,7 @@
 #include <platform.h>
 
 out port ledc0 	 = XS1_PORT_4F;
+out port ledc1	 = XS1_PORT_4D;
 
 void c0()
 {
@@ -12,6 +13,7 @@ void c0()
 		tv += 20000000;
 		t when timerafter(tv) :> void;
 		ledc0 <: ledv;
+		ledc1 <: ledv;
 	}
 }
 
