@@ -126,6 +126,7 @@ def calcjtag(y,z,c):
 	#print "bb:",blocksbefore
 	return (blocksbefore * 4) + jtagmap[c] - offset
 
+#TODO: Fix routing as it's currently going to use nonexistant links to get to the memory board
 def memboard(y,z,c):
 	global jtagmap
 	nodeid = (z+1) << (boardbits + ybits)
