@@ -15,12 +15,15 @@ calculated. This is currently a redundant format due to it only supporting
 rectangular board arrangements! Maybe in the future it'll be more flexible, but
 it's not likely to need it in the mean time.
 
+If "M" is specified as an additional argument, an L1 memory board is added to
+the right of the top row of boards.
+
 Example for a 2x2 mesh of boards: ./xmp16-routegen.py "1 1; 1 1"
-Example for a 2x3 mesh of boards: ./xmp16-routegen.py "1 1 1;1 1 1"
+Example for a 2x3 mesh of boards: ./xmp16-routegen.py "1 1 1;1 1 1" M
 """
 import sys,math
 
-if len(sys.argv) != 2:
+if len(sys.argv) != 2 and len(sys.argv) != 3:
 	print >> sys.stderr, header
 	sys.exit(1)
 
@@ -67,6 +70,7 @@ ymap = [['down','up'],['left','left'],['right','right'],['down','up']]
 zmap = [['right','right'],['right','towards'],['away','left'],['left','left']]
 
 rawconfig = sys.argv[1]
+M = len(sys.argv) == 3 and sys.argv[2] == "M"
 
 configrows = rawconfig.split(';')
 config = []
@@ -80,13 +84,15 @@ xboardnodes = 4
 yboardnodes = 4
 boardnodes = xboardnodes * yboardnodes
 
+xmemboard = int(M)
+
 xboards = len(config[0])
 yboards = len(config)
 
 xbits = int(math.ceil(math.log(xboardnodes)/math.log(2)))
 yboardbits = int(math.ceil(math.log(yboardnodes)/math.log(2)))
 ybits = int(math.ceil(math.log(yboards)/math.log(2)))
-zbits = int(math.ceil(math.log(xboards)/math.log(2)))
+zbits = int(math.ceil(math.log(xboards+xmemboard)/math.log(2)))
 boardbits = xbits + yboardbits
 totalbits = boardbits+ybits+zbits
 
@@ -120,7 +126,37 @@ def calcjtag(y,z,c):
 	#print "bb:",blocksbefore
 	return (blocksbefore * 4) + jtagmap[c] - offset
 
-
+def memboard(y,z,c):
+	global jtagmap
+	nodeid = (z+1) << (boardbits + ybits)
+	route = []
+	jtagmap = [j + 1 for j in jtagmap]
+	jtagnode = calcjtag(y,z,c-1)
+	print
+	print "# MEMORY BOARD START"
+	print "JTAG Node =",jtagnode
+	print hex(nodereg),"=",hex(nodeid),("\t#0b{0:0%db}" % totalbits).format(nodeid)
+	calcdirs(route,nodeid,xbits,xmap[nodeid&((xbits**2)-1)])
+	calcdirs(route,nodeid>>xbits,yboardbits,ymap[nodeid&((xbits**2)-1)])
+	calcdirs(route,nodeid>>(xbits+yboardbits),ybits,ymap[nodeid&((xbits**2)-1)])
+	calcdirs(route,nodeid>>(xbits+yboardbits+ybits),zbits,zmap[nodeid&((xbits**2)-1)])
+	directions = map(lambda x: dirmap[x],route)
+	linkdir = { 				\
+		'a': dirmap['left'],	\
+	}
+	for links in linkdir:
+		for l in links:
+			print hex(linkregs[l]),"=",hex(linkdir[links]<<dirpos)
+	dirregs = [0,0]
+	dirregspos = 0
+	for k,d in enumerate(directions):
+		dirregs[dirregspos] |= directions[k]<<(k*dirwidth)
+		if k == 7:
+			dirregspos += 1
+	for k,d in enumerate(dirregs):
+		print hex(dirreg+k),"=",hex(d)
+	print "# MEMORY BOARD END"
+	print "# Resuming XMP16 board..."
 
 for y in range(yboards):
 	for z in range(xboards):
@@ -132,6 +168,12 @@ for y in range(yboards):
 		print "#new board"
 		for c in range(boardnodes):
 			nodeid = c | (y << boardbits) | (z << (boardbits + ybits))
+
+			if M and c == 8 and y == 0 and z == xboards - 1:
+				print "ADD THE MEMORY BOARD HERE"
+				memboard(y,z,c)
+
+
 			route = []
 			jtagnode = calcjtag(y,z,c)
 			print
