@@ -34,11 +34,12 @@ void __initlinks()
 	write_sswitch_reg_no_ack(myid,XLINK_A_STW,0x81002004);
 	printf("%08x: %08x\n",myid,tv);
 	printf("%08x: Done!\n",myid);
-	while(1)
-	{
-		read_sswitch_reg(!myid,XS1_L_SSWITCH_NODE_ID_NUM,tv);
-		printf("%08x: %08x\n",myid,tv);
-	}
+	c = getChanend((!myid) << 16 | 0x0f02);
+	printf("%08x: Chan = %08x\n",myid,c);
+	asm("in %0,res[%1]":"=r"(tv):"r"(c));
+	printf("%08x: IN: %08x\n",myid,tv);
+	tv = 0xbabecafe;
+	asm("out res[%0],%1"::"r"(c),"r"(tv));
 	return;
 
 	//asm("freer res[%0]"::"r"(c));

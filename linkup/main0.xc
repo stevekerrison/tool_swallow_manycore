@@ -32,11 +32,12 @@ void __initlinks()
 	printf("%08x: Done!\n",myid);
 	read_sswitch_reg(1,XS1_L_SSWITCH_NODE_ID_NUM,tv);
 	printf("%08x: %08x\n",myid,tv);
-	while(1)
-	{
-		read_sswitch_reg(!myid,XS1_L_SSWITCH_NODE_ID_NUM,tv);
-		printf("%08x: %08x\n",myid,tv);
-	}
+	c = getChanend((!myid) << 16 | 0x0f02);
+	printf("%08x: Chan = %08x\n",myid,c);
+	tv = 0xdeadbeef;
+	asm("out res[%0],%1"::"r"(c),"r"(tv));
+	asm("in %0,res[%1]":"=r"(tv):"r"(c));
+	printf("%08x: IN: %08x\n",myid,tv);
 	return;
 
 	//asm("freer res[%0]"::"r"(c));
