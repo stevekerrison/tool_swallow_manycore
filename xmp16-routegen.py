@@ -68,6 +68,8 @@ dirreg = 0x0c
 xmap = [['right','left'],['right','left'],['right','left'],['right','left']]
 ymap = [['down','up'],['left','left'],['right','right'],['down','up']]
 zmap = [['right','right'],['right','towards'],['away','left'],['left','left']]
+#Deal with the memory board creating an irregular mesh.
+zmapmend = [['right','right'],['right','towards'],['right','left'],['up','left']]
 
 rawconfig = sys.argv[1]
 M = len(sys.argv) == 3 and sys.argv[2] == "M"
@@ -171,9 +173,7 @@ for y in range(yboards):
 			nodeid = c | (y << boardbits) | (z << (boardbits + ybits))
 
 			if M and c == 8 and y == 0 and z == xboards - 1:
-				print "ADD THE MEMORY BOARD HERE"
 				memboard(y,z,c)
-
 
 			route = []
 			jtagnode = calcjtag(y,z,c)
@@ -183,7 +183,11 @@ for y in range(yboards):
 			calcdirs(route,nodeid,xbits,xmap[nodeid&((xbits**2)-1)])
 			calcdirs(route,nodeid>>xbits,yboardbits,ymap[nodeid&((xbits**2)-1)])
 			calcdirs(route,nodeid>>(xbits+yboardbits),ybits,ymap[nodeid&((xbits**2)-1)])
-			calcdirs(route,nodeid>>(xbits+yboardbits+ybits),zbits,zmap[nodeid&((xbits**2)-1)])
+			# Meddle with the routing table on the end boards if a memory board is present
+			if M and z == xboards - 1 and c not in [2,3]:
+				calcdirs(route,nodeid>>(xbits+yboardbits+ybits),zbits,zmapmend[nodeid&((xbits**2)-1)])
+			else:
+				calcdirs(route,nodeid>>(xbits+yboardbits+ybits),zbits,zmap[nodeid&((xbits**2)-1)])
 			directions = map(lambda x: dirmap[x],route)
 			linkdir = { 							\
 				'a': dirmap[linkmap[nodeid&((xbits**2)-1)]['a']],	\

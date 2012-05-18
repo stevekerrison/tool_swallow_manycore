@@ -140,9 +140,9 @@
 .extern c0, "f{0}(chd)"
 .extern c1, "f{0}(chd)"
 main.parinfo.debugstring0:
-.asciiz "# 8 \"main.xc\""
+.asciiz "# 13 \"main.xc\""
 main.parinfo.debugstring1:
-.asciiz "# 6 \"main.xc\""
+.asciiz "# 11 \"main.xc\""
 .cc_top main.parinfo.cc, main.parinfo
 .globl main.parinfo, "pi"
 .type  main.parinfo, @object
@@ -484,9 +484,9 @@ __main_xm_0:
 .linkset .LLNK38, 1 + .LLNK39
 .linkset .LLNK37, 1 $M .LLNK38
 .linkset __main_xm_0.maxthreads, .LLNK37
-.par c1, c0, "main.xc:8: error: use of `%s' violates parallel usage rules"
-.par c1, c1, "main.xc:8: error: use of `%s' violates parallel usage rules"
-.par c0, c0, "main.xc:8: error: use of `%s' violates parallel usage rules"
+.par c1, c0, "main.xc:13: error: use of `%s' violates parallel usage rules"
+.par c1, c1, "main.xc:13: error: use of `%s' violates parallel usage rules"
+.par c0, c0, "main.xc:13: error: use of `%s' violates parallel usage rules"
 # Thread names for recovering thread graph in linker
 .set thread.anon.8, 0  #unreal
 .set thread.anon.9, 0  #unreal
@@ -523,98 +523,98 @@ __main_xm_0:
           .asciiz   "/home/steve/phd/sandbox/xmp16/linkup"
 .cc_top __main_xm_0.function, __main_xm_0
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L38
           .asciiz  "main.xc"
-          .int      0x0000000a
-          .int      0x0000000a
-# line info for line 10 
+          .int      0x0000000f
+          .int      0x0000000f
+# line info for line 15 
           .long    .L37
 .cc_bottom __main_xm_0.function
 .cc_top __main_xm_1.function, __main_xm_1
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L33
           .asciiz  "main.xc"
-          .int      0x0000000b
-          .int      0x0000000b
-# line info for line 11 
+          .int      0x00000010
+          .int      0x00000010
+# line info for line 16 
           .long    .L32
 .cc_bottom __main_xm_1.function
 .cc_top __main_xm_2.function, __main_xm_2
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L28
           .asciiz  "main.xc"
-          .int      0x0000000a
-          .int      0x0000000a
-# line info for line 10 
+          .int      0x0000000f
+          .int      0x0000000f
+# line info for line 15 
           .long    .L27
 .cc_bottom __main_xm_2.function
 .cc_top __main_xm_3.function, __main_xm_3
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L23
           .asciiz  "main.xc"
-          .int      0x0000000b
-          .int      0x0000000b
-# line info for line 11 
+          .int      0x00000010
+          .int      0x00000010
+# line info for line 16 
           .long    .L22
 .cc_bottom __main_xm_3.function
 .cc_top __main_xm_4.function, __main_xm_4
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L18
           .asciiz  "main.xc"
-          .int      0x0000000a
-          .int      0x0000000a
-# line info for line 10 
+          .int      0x0000000f
+          .int      0x0000000f
+# line info for line 15 
           .long    .L17
 .cc_bottom __main_xm_4.function
 .cc_top __main_xm_5.function, __main_xm_5
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L13
           .asciiz  "main.xc"
-          .int      0x0000000b
-          .int      0x0000000b
-# line info for line 11 
+          .int      0x00000010
+          .int      0x00000010
+# line info for line 16 
           .long    .L12
 .cc_bottom __main_xm_5.function
 .cc_top __main_xm_6.function, __main_xm_6
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L8
           .asciiz  "main.xc"
-          .int      0x0000000a
-          .int      0x0000000a
-# line info for line 10 
+          .int      0x0000000f
+          .int      0x0000000f
+# line info for line 15 
           .long    .L7
 .cc_bottom __main_xm_6.function
 .cc_top __main_xm_7.function, __main_xm_7
           .asciiz  "main.xc"
-          .int      0x0000000e
-          .int      0x0000000e
-# line info for line 14 
+          .int      0x00000013
+          .int      0x00000013
+# line info for line 19 
           .long    .L3
           .asciiz  "main.xc"
-          .int      0x0000000b
-          .int      0x0000000b
-# line info for line 11 
+          .int      0x00000010
+          .int      0x00000010
+# line info for line 16 
           .long    .L2
 .cc_bottom __main_xm_7.function
 .L41:
