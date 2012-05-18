@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Network xmlns="http://www.xmos.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
+  <Type>Device</Type>
+  <Name>Dummy XN file with >2bn cores scoped, will only get through first stage compile</Name>
+
+  <Declarations>
+    <Declaration>core stdcore[2147483647]</Declaration>
+  </Declarations>
+
+  <Packages>
+    <Package ID="0" Type="XS1-L2A-QF124">
+      <Nodes>
+		<Node Id="0" InPackageId="0" Type="XS1-L1A">
+          <Core Number="0" Reference="stdcore[0]"/>
+        </Node>
+      </Nodes>
+    </Package>
+  </Packages>
+
+  <JTAGChain>
+     <JTAGDevice NodeId="0"/>
+  </JTAGChain>
+ 
+</Network>

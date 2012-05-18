@@ -21,9 +21,11 @@
 #define XLINK_G_DN XS1_L_SSWITCH_SLINK_4_NUM
 #define XLINK_H_DN XS1_L_SSWITCH_SLINK_5_NUM
 
-#define freeChanend(c) asm("freer res[%0]"::"r"(c));
 
 unsigned getChanend(unsigned dst);
 void resetChans(void);
-
+void cResetChans(unsigned myid);
+void txCloseChan(unsigned c);
+void rxCloseChan(unsigned c);
+void freeChanend(unsigned c);
 #endif //_CHAN_H
