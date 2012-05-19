@@ -27,18 +27,70 @@ if len(sys.argv) < 3:
 	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.dat [outputdir]"
 	sys.exit(1)
 
-# Use XCC's preprocessor
+# Use XCC's preprocessor to get the code
 xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
+
+# Read the boardconfig
+bc = open(sys.argv[2],"r").read()
+
+
 
 # Capture the main block
 m = re.search("int\s*main\s*\(.*?\)\s*\{.*?return\s+0\s*;.*?}",xc,re.M|re.S)
 xc = m.group(0)
 
+#Fudge all channel declarations into arrays
 def arrLen(s):
 	if s == '':
 		return 1;
 	return int(s)
+
+def initMain(core):
+	return "\n/* Main for core " + str(core) + """*/
+int main(void)
+{
+	__initLinks();
+	par
+	{
+		"""
+
+def endMain(core):
+	return """
+	}
+	return 0;
+}"""
+
+def initInitLinks(core):
+	return """
+#include <platform.h>
+#include <xs1.h>
+#include "chan.h"
+
+/* __initLinks for core """ + str(core) + """*/
+void __initLinks()
+{
+	unsigned myid = """ + str(core) + """, i,tv,c;
+	/* Set my core ID */
+	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
+	/* Make sure all channels unallocated */
+	resetChans();
+	/* Zero out the link registers */
+	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
+	{
+		write_sswitch_reg_no_ack(myid,i,0);
+	}
+	/* Now allocate the channels needed by this core, setup the links and
+		routing tables */
+	"""
+	#TODO: What he said ^^^
+
+def endInitLinks(core):
+	return """
+	return;
+}"""
+	
+	
 
 # This function contains all the reasons that I love Python
 def getChans(xc):
@@ -80,15 +132,18 @@ for a in allocs:
 	m = re.search("on stdcore\[(\d+)\]",a);
 	core = int(m.group(1))
 	for c in chans:
-		#print a,c
+		#Find all instances of this channel as a channend
 		m = re.findall("(?<!\w)(%s)(?!\w)(\s*\[(\d+)\])?" % c[0],a)
+		#Fudge non-array entities
 		for x in m:
 			if x[2] == '':
 				ref = x[0]+'0'
 			else:
 				ref = x[0]+x[2]
+			#Make sure our channend counter is big enough for this core num
 			if len(coreChanends) != core + 1:
 				coreChanends.extend([0] * (core+1-len(coreChanends)))
+			#Add references to this chanend
 			if ref in channelMappings:
 				channelMappings[ref]['cores'].append(core)
 				channelMappings[ref]['chan'].append(coreChanends[core])
@@ -101,33 +156,43 @@ print "Chanends used per core:",coreChanends
 print "Channel mappings:",channelMappings
 
 mains = {}
+inits = {}
 
 for a in allocs:
+	#Simple search for "on stdcore" - only works with single-lines for now
 	m = re.search("on stdcore\[(\d+)\]",a);
 	core = int(m.group(1))
 	m = re.search(":\s*(\w+)\s*\((.*)\)\s*;",a);
 	fn = m.group(1)
 	args = [x.strip() for x in m.group(2).split(",")]
-	#
+	#Create a new function that passes encoded channel mappings to functions
+	#encoded as:
+	#0:4 - Local resource ID
+	#5:9 - Remote resource ID
+	#16:31 - Remote node ID
+	#Construct a valid resource identifier and do a SETD
 	if core in mains:
 		mains[core] += fn + "("
 	else:
-		mains[core] = "/* Main for core " + str(core) + """*/
-int main(void)
-{
-	par
-	{
-		""" + fn + "("
+		inits[core] = ""
+		mains[core] = fn + "("
 	for arg in args:
 		if mains[core][-1] != '(':
 				mains[core] += ','
-		if re.sub("(\D)$","\g<1>0",re.sub("[\[\]]","",arg)) in channelMappings:
-			dst = (channelMappings[ref]['cores'].pop() << 16)	\
-				| (channelMappings[ref]['chan'].pop() << 8)	| 2;
+		ref = re.sub("(\D)$","\g<1>0",re.sub("[\[\]]","",arg))
+		if ref in channelMappings:
+			dst = (channelMappings[ref]['cores'].pop(0) << 16)	\
+				| (channelMappings[ref]['chan'].pop(0) << 8) | 2;
 			mains[core] += "0x%08x" % dst
 		else:
 			mains[core] += arg
 	mains[core] += ");"
 
 for x in mains:
-	print mains[x] + "\n\t}\n\treturn 0;\n}"
+	inits[x] = initInitLinks(x) + inits[x] + endInitLinks(x)
+	mains[x] = initMain(x) + mains[x] + endMain(x)
+
+for x in mains:
+	print "/************* CORE " + str(x) + " ***************/"
+	print inits[x]
+	print mains[x]

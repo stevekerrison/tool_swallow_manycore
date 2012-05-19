@@ -21,10 +21,10 @@ int main(void)
 		on stdcore[0] : c0(y);
 		on stdcore[1] : c1(y);
 	}*/
-	chan c;
+	chan c[2];
 	par {
-		on stdcore[0] : c0(c[0]);
-		on stdcore[1] : c1(c[0]);
+		on stdcore[0] : c0(c[0],c[1]);
+		on stdcore[1] : c1(c[1],c[0]);
 	}
 	return 0;
 }
