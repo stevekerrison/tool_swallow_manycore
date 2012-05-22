@@ -42,13 +42,13 @@ nodequadrants = [	\
 	3, 3, 2, 2
 ]
 
-dirmap = { 			\
-	'left':0,'right':1, 	\
-	'up':2,'down':3,	\
-	'away':4,'towards':5	\
+dirmap = { 						\
+	'left':0,'right':1, 		\
+	'up':2,'down':3,			\
+	'away':4,'towards':5		\
 }
 
-linkmap = [ 						\
+linkmap = [ 									\
 	{'a':'up','b':'down','efgh':'right'}, 		\
 	{'a':'towards','b':'right','efgh':'left'}, 	\
 	{'a':'left','b':'away','efgh':'right'}, 	\
@@ -57,6 +57,9 @@ linkmap = [ 						\
 
 linkregs = { 'a':0x22,'b':0x23,'c':0x20,'d':0x21, \
 	'e':0x26,'f':0x27,'g':0x24,'h':0x25 }
+
+linkenable = { 'a':0x82,'b':0x83,'c':0x80,'d':0x81,\
+	'e':0x86,'f':0x87,'g':0x84,'h':0x85 }
 
 nodereg = 0x05
 networkpos = 4
@@ -189,9 +192,9 @@ for y in range(yboards):
 			else:
 				calcdirs(route,nodeid>>(xbits+yboardbits+ybits),zbits,zmap[nodeid&((xbits**2)-1)])
 			directions = map(lambda x: dirmap[x],route)
-			linkdir = { 							\
-				'a': dirmap[linkmap[nodeid&((xbits**2)-1)]['a']],	\
-				'b': dirmap[linkmap[nodeid&((xbits**2)-1)]['b']],	\
+			linkdir = { 												\
+				'a': dirmap[linkmap[nodeid&((xbits**2)-1)]['a']],		\
+				'b': dirmap[linkmap[nodeid&((xbits**2)-1)]['b']],		\
 				'efgh': dirmap[linkmap[nodeid&((xbits**2)-1)]['efgh']]	\
 			}
 			for links in linkdir:
@@ -205,4 +208,17 @@ for y in range(yboards):
 					dirregspos += 1
 			for k,d in enumerate(dirregs):
 				print hex(dirreg+k),"=",hex(d)
+			# Now throw away any links that are unconnected
+			if (z == 0 and (c % 4) == 1):
+				del linkdir['a']
+			elif z == xboards - 1 and (c % 4) == 2 and not (M and c == 2 and y == 0 and z == xboards - 1):
+				del linkdir['b']
+			elif y == 0 and c in [0,3]:
+				del linkdir['a']
+			elif y == yboards - 1 and c in [0,3]:
+				del linkdir['b']
+			print "Links:",
+			for x in [hex(linkenable[item]) for sublist in list(linkdir) for item in sublist]:
+				print str(x),
+			print
 
