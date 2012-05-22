@@ -31,20 +31,38 @@ if len(sys.argv) < 3:
 xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
 
-# Read the boardconfig
-bc = open(sys.argv[2],"r").read()
-
-
-
 # Capture the main block
 m = re.search("int\s*main\s*\(.*?\)\s*\{.*?return\s+0\s*;.*?}",xc,re.M|re.S)
 xc = m.group(0)
+
+coreToJtag = {}
 
 #Fudge all channel declarations into arrays
 def arrLen(s):
 	if s == '':
 		return 1;
 	return int(s)
+
+#Returns a board config list, indexed by JTAG ID
+def parseBoardConfig(bc):
+	cfg = {}
+	global coreToJtag
+	percore = [filter(None,x.splitlines()) for x in bc.split("JTAG Node")]
+	pattern = "^(0x[0-9a-f]+)\s*=\s*(0x[0-9a-f]+)"
+	for c in percore[1:]:
+		jtagid = int(re.search("^ = (\d+)$",c[0]).group(1))
+		cfg[jtagid] = {}
+		for l in c[1:]:
+			m = re.match(pattern,l)
+			if m:
+				cfg[jtagid][int(m.group(1),16)] = int(m.group(2),16)
+			else:
+				for x in [int(x,16) for x in l.split(" ")[1:]]:
+					cfg[jtagid][x] = 0x80001002
+		coreToJtag[cfg[jtagid][5]] = jtagid
+	return cfg
+
+bc = parseBoardConfig(open(sys.argv[2],"r").read())
 
 def initMain(core):
 	return "\n/* Main for core " + str(core) + """*/
@@ -196,3 +214,5 @@ for x in mains:
 	print "/************* CORE " + str(x) + " ***************/"
 	print inits[x]
 	print mains[x]
+
+print coreToJtag
