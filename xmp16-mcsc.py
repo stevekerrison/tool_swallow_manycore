@@ -21,7 +21,7 @@ binaries that can be processed using the routing tables provided in boardconfig.
 If an outputdir is not specified, $PWD is used.
 """
 
-import sys,os,re,subprocess
+import sys,os,re,subprocess,shlex
 
 if len(sys.argv) < 3:
 	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.dat [outputdir]"
@@ -33,6 +33,9 @@ if len(sys.argv) == 4:
 	outdir = sys.argv[3] + "/"
 else:
 	outdir = pwd + "/"
+
+includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
+print includes
 
 # Use XCC's preprocessor to get the code
 xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
@@ -65,7 +68,7 @@ def parseBoardConfig(bc):
 				cfg[jtagid][int(m.group(1),16)] = int(m.group(2),16)
 			else:
 				for x in [int(x,16) for x in l.split(" ")[1:]]:
-					cfg[jtagid][x] = 0x80001002
+					cfg[jtagid][x] = 0xc0004008
 		coreToJtag[cfg[jtagid][5]] = jtagid
 	return cfg
 
@@ -88,15 +91,14 @@ def endMain(core):
 
 def initInitLinks(core):
 	ret = ""
-	ret += """
-#include <platform.h>
-#include <xs1.h>
-#include "chan.h"
+	for i in includes:
+		ret += i + "\n"
+	ret += """#include <stdio.h>
 
 /* __initLinks for core """ + str(core) + """*/
 void __initLinks()
 {
-	unsigned myid = """ + str(core) + """, i,tv,c;
+	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """,i,tv,c;
 	/* Set my core ID */
 	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
@@ -110,31 +112,49 @@ void __initLinks()
 		routing tables */
 """
 	j = coreToJtag[core]
+	debugstr = """	printf("%%d[%%d]: %s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
 	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
 	stw = [k for k in bc[j] if k in range(0x80,0x88)]
 	dn = [k for k in bc[j] if k in range(0x20,0x28)]
 	rt = [k for k in bc[j] if k in range(0xc,0xe)]
+	#ret += """	printf("Hai I'm core %d\\n",myid);return;\n"""
+	debug = True
 	ret += "	//Link enabling\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r])
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
 	ret += "	//Route configuration\n"
 	for r in rt:
 		ret += wrstr % (r,bc[j][r])
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
 	ret += "	//Attach links to routes\n"
 	for r in dn:
 		ret += wrstr % (r,bc[j][r])
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
 	ret += "	//Issue HELLO on active links\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
 	ret += "	//Wait for credit\n"
 	chkstr = "	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x%02x,tv); }\n"
+	if debug:
+		ret += """	printf("%d[%d]: Got initial credits\\n",myid,jtagid);\n"""
+	ret += "	while(i++ < 200000);\n"
 	for r in stw:
 		ret += chkstr % r
+		if debug:
+			ret += debugstr % ("Read","from","tv",hex(r))
 	ret += "	//Reissue HELLOs\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
 	ret += "	//Hopefully we're done!\n"
-	ret += "	cResetChans(myid);\n"
+	#ret += "	cResetChans(myid);\n"
 	return ret
 
 def endInitLinks(core):
@@ -251,6 +271,9 @@ for x in mains:
 	print >> f,mains[x]
 	f.close()
 
+print "Total available cores:",str(len(coreToJtag))
+print "Num cores in use:",str(len(mains))
+
 unused = [(x,coreToJtag[x]) for x in coreToJtag if x not in mains]
 print "Unused cores (Node,JTAG) :",unused
 for x in unused:
@@ -260,3 +283,23 @@ for x in unused:
 	print >> f,initMain(x[0]) + "		asm(\"freet\"::);\n" + endMain(x[0])
 	f.close()
 
+build = ""
+
+print "Now building..."
+i = 1
+ilim = len(coreToJtag)
+for c in coreToJtag.items():
+	cmd = "xcc -o" + outdir + "scmain_" + str(c[1]) + ".xe " + outdir + "scmain_" + str(c[1]) + ".xc ledtest.xc chan.S chan_c.c -target=XK-1"
+	print "\r%0.2f%%" % ((float(i)/ilim)*100),
+	i += 1
+	sys.stdout.flush()
+	subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE).communicate()
+	sec = subprocess.Popen(shlex.split("xesection " + outdir + "scmain_" + str(c[1]) + ".xe 1"), stdout=subprocess.PIPE).communicate()[0]
+	f = open(outdir + str(c[1]) + ".sec","w")
+	build += " " + outdir + str(c[1]) + ".sec"
+	f.write(sec)
+	f.close()
+
+print "\nDone building!"
+
+subprocess.Popen(shlex.split("xebuilder.py " + build + " " + outdir + "a.xe"), stdout=subprocess.PIPE).communicate()[0]

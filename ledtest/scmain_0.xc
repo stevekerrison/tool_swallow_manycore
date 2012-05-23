@@ -1,13 +1,13 @@
 /************* UNUSED CORE 5***************/
-
 #include <platform.h>
-#include <xs1.h>
+#include "ledtest.h"
 #include "chan.h"
+#include <stdio.h>
 
 /* __initLinks for core 5*/
 void __initLinks()
 {
-	unsigned myid = 5, i,tv,c;
+	unsigned myid = 5, jtagid= 0,i,tv,c;
 	/* Set my core ID */
 	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
@@ -20,41 +20,70 @@ void __initLinks()
 	/* Now allocate the channels needed by this core, setup the links and
 		routing tables */
 	//Link enabling
-	write_sswitch_reg_no_ack(myid,0x85,0x80001002);
-	write_sswitch_reg_no_ack(myid,0x87,0x80001002);
-	write_sswitch_reg_no_ack(myid,0x83,0x80001002);
-	write_sswitch_reg_no_ack(myid,0x84,0x80001002);
-	write_sswitch_reg_no_ack(myid,0x86,0x80001002);
+	write_sswitch_reg_no_ack(myid,0x85,0xc0004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc0004008,0x85);
+	write_sswitch_reg_no_ack(myid,0x87,0xc0004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc0004008,0x87);
+	write_sswitch_reg_no_ack(myid,0x83,0xc0004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc0004008,0x83);
+	write_sswitch_reg_no_ack(myid,0x84,0xc0004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc0004008,0x84);
+	write_sswitch_reg_no_ack(myid,0x86,0xc0004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc0004008,0x86);
 	//Route configuration
 	write_sswitch_reg_no_ack(myid,0x0c,0x00000010);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x10,0xc);
 	write_sswitch_reg_no_ack(myid,0x0d,0x00000000);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x0,0xd);
 	//Attach links to routes
 	write_sswitch_reg_no_ack(myid,0x22,0x00000500);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x500,0x22);
 	write_sswitch_reg_no_ack(myid,0x23,0x00000100);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x100,0x23);
 	write_sswitch_reg_no_ack(myid,0x24,0x00000000);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x0,0x24);
 	write_sswitch_reg_no_ack(myid,0x25,0x00000000);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x0,0x25);
 	write_sswitch_reg_no_ack(myid,0x26,0x00000000);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x0,0x26);
 	write_sswitch_reg_no_ack(myid,0x27,0x00000000);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0x0,0x27);
 	//Issue HELLO on active links
-	write_sswitch_reg_no_ack(myid,0x85,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x87,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x83,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x84,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x86,0x81001002);
+	write_sswitch_reg_no_ack(myid,0x85,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x85);
+	write_sswitch_reg_no_ack(myid,0x87,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x87);
+	write_sswitch_reg_no_ack(myid,0x83,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x83);
+	write_sswitch_reg_no_ack(myid,0x84,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x84);
+	write_sswitch_reg_no_ack(myid,0x86,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x86);
 	//Wait for credit
+	printf("%d[%d]: Got initial credits\n",myid,jtagid);
+	while(i++ < 200000);
 	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x85,tv); }
+	printf("%d[%d]: Read 0x%08x from 0x%02x\n",myid,jtagid,tv,0x85);
 	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x87,tv); }
+	printf("%d[%d]: Read 0x%08x from 0x%02x\n",myid,jtagid,tv,0x87);
 	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x83,tv); }
+	printf("%d[%d]: Read 0x%08x from 0x%02x\n",myid,jtagid,tv,0x83);
 	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x84,tv); }
+	printf("%d[%d]: Read 0x%08x from 0x%02x\n",myid,jtagid,tv,0x84);
 	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x86,tv); }
+	printf("%d[%d]: Read 0x%08x from 0x%02x\n",myid,jtagid,tv,0x86);
 	//Reissue HELLOs
-	write_sswitch_reg_no_ack(myid,0x85,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x87,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x83,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x84,0x81001002);
-	write_sswitch_reg_no_ack(myid,0x86,0x81001002);
+	write_sswitch_reg_no_ack(myid,0x85,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x85);
+	write_sswitch_reg_no_ack(myid,0x87,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x87);
+	write_sswitch_reg_no_ack(myid,0x83,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x83);
+	write_sswitch_reg_no_ack(myid,0x84,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x84);
+	write_sswitch_reg_no_ack(myid,0x86,0xc1004008);
+	printf("%d[%d]: Written 0x%08x to 0x%02x\n",myid,jtagid,0xc1004008,0x86);
 	//Hopefully we're done!
-	cResetChans(myid);
 
 	return;
 }
