@@ -21,11 +21,18 @@ binaries that can be processed using the routing tables provided in boardconfig.
 If an outputdir is not specified, $PWD is used.
 """
 
-import sys,re,subprocess
+import sys,os,re,subprocess
 
 if len(sys.argv) < 3:
 	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.dat [outputdir]"
 	sys.exit(1)
+
+pwd = os.getcwd()
+
+if len(sys.argv) == 4:
+	outdir = sys.argv[3] + "/"
+else:
+	outdir = pwd + "/"
 
 # Use XCC's preprocessor to get the code
 xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
@@ -71,7 +78,7 @@ int main(void)
 	__initLinks();
 	par
 	{
-		"""
+"""
 
 def endMain(core):
 	return """
@@ -80,7 +87,8 @@ def endMain(core):
 }"""
 
 def initInitLinks(core):
-	return """
+	ret = ""
+	ret += """
 #include <platform.h>
 #include <xs1.h>
 #include "chan.h"
@@ -100,8 +108,34 @@ void __initLinks()
 	}
 	/* Now allocate the channels needed by this core, setup the links and
 		routing tables */
-	"""
-	#TODO: What he said ^^^
+"""
+	j = coreToJtag[core]
+	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
+	stw = [k for k in bc[j] if k in range(0x80,0x88)]
+	dn = [k for k in bc[j] if k in range(0x20,0x28)]
+	rt = [k for k in bc[j] if k in range(0xc,0xe)]
+	ret += "	//Link enabling\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r])
+	ret += "	//Route configuration\n"
+	for r in rt:
+		ret += wrstr % (r,bc[j][r])
+	ret += "	//Attach links to routes\n"
+	for r in dn:
+		ret += wrstr % (r,bc[j][r])
+	ret += "	//Issue HELLO on active links\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r] | 0x01000000)
+	ret += "	//Wait for credit\n"
+	chkstr = "	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x%02x,tv); }\n"
+	for r in stw:
+		ret += chkstr % r
+	ret += "	//Reissue HELLOs\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r] | 0x01000000)
+	ret += "	//Hopefully we're done!\n"
+	ret += "	cResetChans(myid);\n"
+	return ret
 
 def endInitLinks(core):
 	return """
@@ -190,10 +224,10 @@ for a in allocs:
 	#16:31 - Remote node ID
 	#Construct a valid resource identifier and do a SETD
 	if core in mains:
-		mains[core] += fn + "("
+		mains[core] += "		" + fn + "("
 	else:
 		inits[core] = ""
-		mains[core] = fn + "("
+		mains[core] = "		" + fn + "("
 	for arg in args:
 		if mains[core][-1] != '(':
 				mains[core] += ','
@@ -204,15 +238,25 @@ for a in allocs:
 			mains[core] += "0x%08x" % dst
 		else:
 			mains[core] += arg
-	mains[core] += ");"
+	mains[core] += ");\n"
 
 for x in mains:
 	inits[x] = initInitLinks(x) + inits[x] + endInitLinks(x)
 	mains[x] = initMain(x) + mains[x] + endMain(x)
 
 for x in mains:
-	print "/************* CORE " + str(x) + " ***************/"
-	print inits[x]
-	print mains[x]
+	f = open(outdir + "scmain_" + str(coreToJtag[x]) + ".xc","w")
+	print >> f,"/************* CORE " + str(x) + " ***************/"
+	print >> f,inits[x]
+	print >> f,mains[x]
+	f.close()
 
-print coreToJtag
+unused = [(x,coreToJtag[x]) for x in coreToJtag if x not in mains]
+print "Unused cores (Node,JTAG) :",unused
+for x in unused:
+	f = open(outdir + "scmain_" + str(x[1]) + ".xc","w")
+	print >> f,"/************* UNUSED CORE " + str(x[0]) + "***************/"
+	print >> f,initInitLinks(x[0]),endInitLinks(x[0])
+	print >> f,initMain(x[0]) + "		asm(\"freet\"::);\n" + endMain(x[0])
+	f.close()
+
