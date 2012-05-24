@@ -14,7 +14,7 @@ Author: Steve Kerrison <steve.kerrison@bristol.ac.uk>
 Created: 18th May 2012
 
 Usage:
-	xmp16-mcsc.py mcmain.xe boardconfig.dat [outputdir]
+	xmp16-mcsc.py mcmain.xe boardconfig.brd [outputdir]
 
 Takes a multi-core main, tries to parse it and produce a set of single-core
 binaries that can be processed using the routing tables provided in boardconfig.
@@ -24,7 +24,7 @@ If an outputdir is not specified, $PWD is used.
 import sys,os,re,subprocess,shlex
 
 if len(sys.argv) < 3:
-	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.dat [outputdir]"
+	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.brd [outputdir]"
 	sys.exit(1)
 
 pwd = os.getcwd()
@@ -67,7 +67,7 @@ def parseBoardConfig(bc):
 				cfg[jtagid][int(m.group(1),16)] = int(m.group(2),16)
 			else:
 				for x in [int(x,16) for x in l.split(" ")[1:]]:
-					cfg[jtagid][x] = 0xc0004008
+					cfg[jtagid][x] = 0xc0000000
 		coreToJtag[cfg[jtagid][5]] = jtagid
 	return cfg
 
@@ -111,15 +111,14 @@ void __initLinks()
 		routing tables */
 """
 	j = coreToJtag[core]
-	debugstr = """	printf("%%d[%%d]: %s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
+	debugstr = """	printf("%%d[%%d]:	%s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
 	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
-	chkstr = "	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x%02x,tv); }\n"
-	stw = [k for k in bc[j] if k in range(0x80,0x88)]
+	stw = [k for k in bc[j] if k in range(0x84,0x88)]
 	dn = [k for k in bc[j] if k in range(0x20,0x28)]
 	rt = [k for k in bc[j] if k in range(0xc,0xe)]
 	#ret += """	printf("Hai I'm core %d\\n",myid);return;\n"""
 	debug = True
-	ret += "	//Link configuring\n"
+	ret += "	//Link enabling\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r])
 		if debug:
@@ -134,19 +133,73 @@ void __initLinks()
 		ret += wrstr % (r,bc[j][r])
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
-	ret += "	//Issue HELLOs, wait for credit, then reissue\n"
+	ret += "	//Issue HELLO on active links\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-		ret += chkstr % r
+	ret += "	//Wait for credit\n"
+	chkstr = """	tv = 0;
+	i = 1;
+	while((tv & 0x0c000000) != 0x04000000)
+	{
+		i++;
+		if (tv & 0x08000000)
+		{
+			write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);
+		}
+		read_sswitch_reg(myid,0x%02x,tv);
+	}
+"""
+	for r in stw:
+		ret += chkstr % (r,bc[j][r],r)
 		if debug:
 			ret += debugstr % ("Read","from","tv",hex(r))
+			ret += """	printf("%d[%d]:	Got initial credits for %02x after %d attempts\\n",myid,jtagid,""" + hex(r) + """,i);\n"""
+	ret += "	//Reissue HELLOs\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r] | 0x01000000)
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
+	#Do off-chip links separately for now
+	stw = [k for k in bc[j] if k in range(0x82,0x84)]
+	ret += "	//Link enabling\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r])
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
+	ret += "	//Issue HELLO on active links\n"
+	for r in stw:
+		ret += wrstr % (r,bc[j][r] | 0x01000000)
+		if debug:
+			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
+	ret += "	//Wait for credit\n"
+	chkstr = """	tv = 0;
+	i = 1;
+	while((tv & 0x0c000000) != 0x04000000)
+	{
+		i++;
+		if (tv & 0x08000000)
+		{
+			write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);
+		}
+		read_sswitch_reg(myid,0x%02x,tv);
+	}
+"""
+	for r in stw:
+		ret += chkstr % (r,bc[j][r],r)
+		if debug:
+			ret += debugstr % ("Read","from","tv",hex(r))
+			ret += """	printf("%d[%d]:	Got initial credits for %02x after %d attempts\\n",myid,jtagid,""" + hex(r) + """,i);\n"""
+	ret += "	//Reissue HELLOs\n"
+	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
 	ret += "	//Hopefully we're done!\n"
-	#ret += "	cResetChans(myid);\n"
+	ret += "	cResetChans(myid);\n"
+	if debug:
+		ret += """	printf("%d[%d]:	Done link initialisation!\\n",myid,jtagid);\n"""
 	return ret
 
 def endInitLinks(core):

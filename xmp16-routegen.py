@@ -215,7 +215,7 @@ for y in range(yboards):
 				del linkdir['b']
 			elif y == 0 and c in [0,3]:
 				del linkdir['a']
-			elif y == yboards - 1 and c in [0,3]:
+			elif y == yboards - 1 and c in [12,15]:
 				del linkdir['b']
 			print "Links:",
 			for x in [hex(linkenable[item]) for sublist in list(linkdir) for item in sublist]:
