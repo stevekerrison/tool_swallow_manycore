@@ -35,7 +35,6 @@ else:
 	outdir = pwd + "/"
 
 includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
-print includes
 
 # Use XCC's preprocessor to get the code
 xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
@@ -114,12 +113,13 @@ void __initLinks()
 	j = coreToJtag[core]
 	debugstr = """	printf("%%d[%%d]: %s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
 	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
+	chkstr = "	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x%02x,tv); }\n"
 	stw = [k for k in bc[j] if k in range(0x80,0x88)]
 	dn = [k for k in bc[j] if k in range(0x20,0x28)]
 	rt = [k for k in bc[j] if k in range(0xc,0xe)]
 	#ret += """	printf("Hai I'm core %d\\n",myid);return;\n"""
 	debug = True
-	ret += "	//Link enabling\n"
+	ret += "	//Link configuring\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r])
 		if debug:
@@ -134,22 +134,14 @@ void __initLinks()
 		ret += wrstr % (r,bc[j][r])
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
-	ret += "	//Issue HELLO on active links\n"
+	ret += "	//Issue HELLOs, wait for credit, then reissue\n"
 	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-	ret += "	//Wait for credit\n"
-	chkstr = "	tv = 0; while(!(tv & 0x04000000)) { read_sswitch_reg(myid,0x%02x,tv); }\n"
-	if debug:
-		ret += """	printf("%d[%d]: Got initial credits\\n",myid,jtagid);\n"""
-	ret += "	while(i++ < 200000);\n"
-	for r in stw:
 		ret += chkstr % r
 		if debug:
 			ret += debugstr % ("Read","from","tv",hex(r))
-	ret += "	//Reissue HELLOs\n"
-	for r in stw:
 		ret += wrstr % (r,bc[j][r] | 0x01000000)
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
