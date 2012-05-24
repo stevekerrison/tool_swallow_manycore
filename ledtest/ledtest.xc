@@ -10,7 +10,7 @@ void doled(void)
 	t :> tv;
 	while (1)
 	{
-		pv = 1 - pv;
+		pv = 0xf - pv;
 		tv += 25000000;
 		t when timerafter(tv) :> void;
 		leds1 <: pv;

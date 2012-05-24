@@ -21,7 +21,7 @@ binaries that can be processed using the routing tables provided in boardconfig.
 If an outputdir is not specified, $PWD is used.
 """
 
-import sys,os,re,subprocess,shlex
+import sys,os,re,subprocess,shlex,multiprocessing
 
 if len(sys.argv) < 3:
 	print >> sys.stderr, "ERROR: Usage:",sys.argv[0],"mcmain.xe boardconfig.brd [outputdir]"
@@ -45,6 +45,23 @@ m = re.search("int\s*main\s*\(.*?\)\s*\{.*?return\s+0\s*;.*?}",xc,re.M|re.S)
 xc = m.group(0)
 
 coreToJtag = {}
+
+zeroLeft = [0x87,0x85,0x86,0x84,0x83,0x82]
+zeroRight = [0x87,0x85,0x86,0x84,0x82,0x83]
+oneEven = [0x84,0x86,0x85,0x87,0x83,0x82]
+oneOdd = [0x84,0x86,0x85,0x87,0x82,0x83]
+#zeroLeft = [0x86,0x83,0x82]
+#zeroRight = [0x86,0x82,0x83]
+#oneEven = [0x85,0x83,0x82]
+#oneOdd = [0x85,0x82,0x83]
+
+#The order to bring links up in on the board.
+linkOrder = [									\
+	oneEven,zeroLeft,zeroRight,oneEven,			\
+	oneOdd,zeroLeft,zeroRight,oneOdd,			\
+	oneEven,zeroLeft,zeroRight,oneEven,			\
+	oneOdd,zeroLeft,zeroRight,oneOdd			\
+]
 
 #Fudge all channel declarations into arrays
 def arrLen(s):
@@ -90,6 +107,14 @@ def endMain(core):
 
 def initInitLinks(core):
 	ret = ""
+	j = coreToJtag[core]
+	debugstr = """	printf("%%d[%%d]:	%s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
+	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
+	dn = [k for k in bc[j] if k in range(0x20,0x28)]
+	rt = [k for k in bc[j] if k in range(0xc,0xe)]
+	#stw = [k for k in bc[j] if k in range(0x82,0x88)]
+	stw = [l for l in linkOrder[core%16] if l in [k for k in bc[j] if k in range(0x82,0x88)]]
+	
 	for i in includes:
 		ret += i + "\n"
 	ret += """#include <stdio.h>
@@ -97,7 +122,13 @@ def initInitLinks(core):
 /* __initLinks for core """ + str(core) + """*/
 void __initLinks()
 {
-	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """,i,tv,c;
+	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """,i;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c;
+	timer t;
+	unsigned links[""" + str(len(stw)) + """] = {"""
+	for x in stw:
+		ret += hex(x) + ","
+	ret += """};
 	/* Set my core ID */
 	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
@@ -107,22 +138,16 @@ void __initLinks()
 	{
 		write_sswitch_reg_no_ack(myid,i,0);
 	}
-	/* Now allocate the channels needed by this core, setup the links and
-		routing tables */
+	/* Enable all links for now... */
+	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
+	{
+		write_sswitch_reg_no_ack(myid,i,0xc0001002);
+	}
+	t :> tv;
+	t when timerafter(tv + 1600000-(100000*jtagid)) :> void;
 """
-	j = coreToJtag[core]
-	debugstr = """	printf("%%d[%%d]:	%s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
-	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
-	stw = [k for k in bc[j] if k in range(0x84,0x88)]
-	dn = [k for k in bc[j] if k in range(0x20,0x28)]
-	rt = [k for k in bc[j] if k in range(0xc,0xe)]
-	#ret += """	printf("Hai I'm core %d\\n",myid);return;\n"""
-	debug = True
-	ret += "	//Link enabling\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r])
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
+	
+	debug = False
 	ret += "	//Route configuration\n"
 	for r in rt:
 		ret += wrstr % (r,bc[j][r])
@@ -133,73 +158,39 @@ void __initLinks()
 		ret += wrstr % (r,bc[j][r])
 		if debug:
 			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
-	ret += "	//Issue HELLO on active links\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r] | 0x01000000)
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-	ret += "	//Wait for credit\n"
-	chkstr = """	tv = 0;
-	i = 1;
-	while((tv & 0x0c000000) != 0x04000000)
+	
+	ret += """
+	/* Issue hello and wait for credit on active links */
+	for (i = 0; i < nlinks; i += 1)
 	{
-		i++;
-		if (tv & 0x08000000)
+		resetChans();
+		//printf("%d[%d]:	Bringing up link 0x%02x\\n",myid,jtagid,links[i]);
+		write_sswitch_reg_no_ack(myid,links[i],0xc1001002);
+		tv = 0;
+		c = 0;
+		while((tv & 0x0c000000) != 0x04000000)
 		{
-			write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);
+			if (tv & 0x08000000)
+			{
+				/*write_sswitch_reg_no_ack(myid,links[i],0xc0801002);
+				write_sswitch_reg_no_ack(myid,links[i],0xc1001002);*/
+				printf("%d[%d]:	Link error on 0x%02x, retry\\n",myid,jtagid,links[i]);
+				write_sswitch_reg_no_ack(myid,links[i],0xc1801002);
+				/*printf("%d[%d]:	Link error on 0x%02x, bailing\\n",myid,jtagid,links[i]);
+				return; //GTFO*/
+			}
+			read_sswitch_reg(myid,links[i],tv);
+			if (c++ > 200000)
+			{
+				printf("%d[%d]:	Link error on 0x%02x, fail! (%d/%d) initialised\\n",myid,jtagid,links[i],i,nlinks);
+				return;
+			}
 		}
-		read_sswitch_reg(myid,0x%02x,tv);
+		write_sswitch_reg_no_ack(myid,links[i],0xc1001002);
+		//printf("%d[%d]:	0x%02x is up!\\n",myid,jtagid,links[i]);
 	}
+	printf("%d[%d]:	Links initialised!\\n",myid,jtagid);
 """
-	for r in stw:
-		ret += chkstr % (r,bc[j][r],r)
-		if debug:
-			ret += debugstr % ("Read","from","tv",hex(r))
-			ret += """	printf("%d[%d]:	Got initial credits for %02x after %d attempts\\n",myid,jtagid,""" + hex(r) + """,i);\n"""
-	ret += "	//Reissue HELLOs\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r] | 0x01000000)
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-	#Do off-chip links separately for now
-	stw = [k for k in bc[j] if k in range(0x82,0x84)]
-	ret += "	//Link enabling\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r])
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
-	ret += "	//Issue HELLO on active links\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r] | 0x01000000)
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-	ret += "	//Wait for credit\n"
-	chkstr = """	tv = 0;
-	i = 1;
-	while((tv & 0x0c000000) != 0x04000000)
-	{
-		i++;
-		if (tv & 0x08000000)
-		{
-			write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);
-		}
-		read_sswitch_reg(myid,0x%02x,tv);
-	}
-"""
-	for r in stw:
-		ret += chkstr % (r,bc[j][r],r)
-		if debug:
-			ret += debugstr % ("Read","from","tv",hex(r))
-			ret += """	printf("%d[%d]:	Got initial credits for %02x after %d attempts\\n",myid,jtagid,""" + hex(r) + """,i);\n"""
-	ret += "	//Reissue HELLOs\n"
-	for r in stw:
-		ret += wrstr % (r,bc[j][r] | 0x01000000)
-		if debug:
-			ret += debugstr % ("Written","to",hex(bc[j][r] | 0x01000000),hex(r))
-	ret += "	//Hopefully we're done!\n"
-	ret += "	cResetChans(myid);\n"
-	if debug:
-		ret += """	printf("%d[%d]:	Done link initialisation!\\n",myid,jtagid);\n"""
 	return ret
 
 def endInitLinks(core):
@@ -325,7 +316,7 @@ for x in unused:
 	f = open(outdir + "scmain_" + str(x[1]) + ".xc","w")
 	print >> f,"/************* UNUSED CORE " + str(x[0]) + "***************/"
 	print >> f,initInitLinks(x[0]),endInitLinks(x[0])
-	print >> f,initMain(x[0]) + "		asm(\"freet\"::);\n" + endMain(x[0])
+	print >> f,initMain(x[0]) + "		while(1);//asm(\"freet\"::);\n" + endMain(x[0])
 	f.close()
 
 build = ""
@@ -333,18 +324,24 @@ build = ""
 print "Now building..."
 i = 1
 ilim = len(coreToJtag)
-for c in coreToJtag.items():
-	cmd = "xcc -o" + outdir + "scmain_" + str(c[1]) + ".xe " + outdir + "scmain_" + str(c[1]) + ".xc ledtest.xc chan.S chan_c.c -target=XK-1"
-	print "\r%0.2f%%" % ((float(i)/ilim)*100),
-	i += 1
-	sys.stdout.flush()
+
+def compileXc(c):
+	cmd = "xcc -O2 -o" + outdir + "scmain_" + str(c[1]) + ".xe " + outdir + "scmain_" + str(c[1]) + ".xc ledtest.xc chan.S chan_c.c XMP16-unicore.xn"
 	subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE).communicate()
+
+#Parallel build!!!
+pool = multiprocessing.Pool(None)
+tasks = coreToJtag.items()
+r = pool.map_async(compileXc, tasks)
+r.wait() # Wait on the results
+
+for c in coreToJtag.items():
 	sec = subprocess.Popen(shlex.split("xesection " + outdir + "scmain_" + str(c[1]) + ".xe 1"), stdout=subprocess.PIPE).communicate()[0]
 	f = open(outdir + str(c[1]) + ".sec","w")
 	build += " " + outdir + str(c[1]) + ".sec"
 	f.write(sec)
 	f.close()
 
-print "\nDone building!"
+print "Done building!"
 
 subprocess.Popen(shlex.split("xebuilder.py " + build + " " + outdir + "a.xe"), stdout=subprocess.PIPE).communicate()[0]

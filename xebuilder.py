@@ -35,7 +35,9 @@ out.write("XMOS\1\0\0\0")
 for fn in sys.argv[1:-1]:
 	f = open(fn,"rb")
 	out.write(f.read())
-	out.write("\05\0\0\0\x14\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x62\x10\xdd\x20")
 	f.close()
+
+for fn in sys.argv[1:-1]:
+	out.write("\05\0\0\0\x14\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\x62\x10\xdd\x20")
 
 out.write("\x55\x55\0\0\0\0\0\0\0\0\0\0");

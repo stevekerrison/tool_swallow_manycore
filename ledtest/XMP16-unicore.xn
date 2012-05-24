@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Network xmlns="http://www.xmos.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
+  <Type>Device</Type>
+  <Name>Single core of an XMP16</Name>
+
+  <Declarations>
+    <Declaration>core stdcore[1]</Declaration>
+  </Declarations>
+
+  <Packages>
+    <Package id="0" Type="XS1-L1A-TQ128">
+      <Nodes>
+        <Node Id="0" InPackageId="0" Type="XS1-L1A" Oscillator="25MHz" ReferenceFrequency="100MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[0]">
+            <Port Location="XS1_PORT_4F" Name="PORT_LED"/><!-- Only on odd-numbered cores -->
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+  </Packages>
+
+  <Links>
+  </Links>
+
+  <JTAGChain>
+     <JTAGDevice NodeId="0"/>
+  </JTAGChain>
+
+</Network>
+
+

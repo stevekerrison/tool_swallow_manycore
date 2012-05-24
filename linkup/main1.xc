@@ -6,7 +6,7 @@ void __initlinks()
 {
 	timer t;
 	unsigned myid = 1, i;
-	unsigned c, dst = 0x00000102, tv;
+	unsigned c, dst = 0x00000102,tv;
 
 	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	resetChans();
