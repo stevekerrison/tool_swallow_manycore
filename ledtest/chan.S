@@ -6,10 +6,23 @@
 .align 4
 getChanend:
 	getr r1,2
+	bf r1,retGetChanend
 	setd res[r1],r0
+retGetChanend:
 	mov r0,r1
 	retsp 0
 .cc_bottom getChanend.elim
+
+.cc_top getLocalAnonChanend.elim, getLocalAnonChanend
+.globl getLocalAnonChanend
+.global getLocalAnonChanend.nstackwords
+.linkset getLocalAnonChanend.nstackwords, 0
+.align 4
+getLocalAnonChanend:
+	getr r0,0x2
+	retsp 0x0
+.cc_bottom getLocalAnonChanend.elim
+
 .cc_top resetChans.elim, resetChans
 .globl resetChans
 .align 4

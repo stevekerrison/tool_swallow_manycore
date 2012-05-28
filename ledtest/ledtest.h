@@ -3,4 +3,6 @@
 
 void doled(void);
 
+void switchChat(unsigned i, unsigned max);
+
 #endif //_LEDTEST_H

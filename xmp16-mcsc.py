@@ -83,6 +83,8 @@ def parseBoardConfig(bc):
 			if m:
 				cfg[jtagid][int(m.group(1),16)] = int(m.group(2),16)
 			else:
+				if l[0] == '#':
+					continue
 				for x in [int(x,16) for x in l.split(" ")[1:]]:
 					cfg[jtagid][x] = 0x80000000
 		coreToJtag[cfg[jtagid][5]] = jtagid
@@ -109,7 +111,7 @@ def initInitLinks(core):
 	ret = ""
 	j = coreToJtag[core]
 	debugstr = """	printf("%%d[%%d]:	%s 0x%%08x %s 0x%%02x\\n",myid,jtagid,%s,%s);\n"""
-	wrstr = "	write_sswitch_reg_no_ack(myid,0x%02x,0x%08x);\n"
+	wrstr = "	write_sswitch_reg_no_ack_clean(myid,0x%02x,0x%08x);\n"
 	dn = [k for k in bc[j] if k in range(0x20,0x28)]
 	rt = [k for k in bc[j] if k in range(0x8,0xe)]
 	#stw = [k for k in bc[j] if k in range(0x82,0x88)]
@@ -123,25 +125,25 @@ def initInitLinks(core):
 void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """,i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c0,c,d,linksetting = 0xc0000800;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
 		ret += hex(x) + ","
 	ret += """};
 	/* Set my core ID */
-	write_sswitch_reg_no_ack(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
+	write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
-	resetChans();
+	cResetChans(myid);
 	/* Zero out the link registers */
 	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
 	{
-		write_sswitch_reg_no_ack(myid,i,0);
+		write_sswitch_reg_no_ack_clean(myid,i,0);
 	}
-	/* Enable all just internal links for now... */
-	for (i = 0; i < 4; i += 1)
+	/* Enable all links */
+	for (i = 0; i < nlinks; i += 1)
 	{
-		write_sswitch_reg_no_ack(myid,links[i],0x80020040);
+		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
 	}
 """
 		
@@ -159,88 +161,35 @@ void __initLinks()
 	
 	ret += """
 	/* Issue hello and wait for credit on active links */
-	for (i = 0; i < 4; i += 1)
+	for (i = 0; i < nlinks; i += 1)
 	{
-		resetChans();
-		//printf("%d[%d]:	Bringing up link 0x%02x\\n",myid,jtagid,links[i]);
-		write_sswitch_reg_no_ack(myid,links[i],0x81020040);
+		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
 		tv = 0;
 		c = 0;
 		while((tv & 0x0e000000) != 0x06000000)
 		{
-			if (c++ > 200) //wait a while
+			if (tv & 0x08000000)
+			{
+				printf ("%d[%d]:	LINK ERROR ON 0x%02x\\n",myid,jtagid,links[i]);
+				write_sswitch_reg_no_ack_clean(myid,links[i],0x00800000);
+				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
+				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
+			}
+			else if ((++c % 2000) == 0) //wait a while
 			{
 				//Hmmm, we haven't got full-duplex linkage, let's try again
-				//printf("%d[%d]:	Timeout on 0x%02x, retry\\n",myid,jtagid,links[i]);
-				write_sswitch_reg_no_ack(myid,links[i],0x81020040);
-				c = 0;
+				//printf ("%d[%d]:	Link retry 0x%02x\\n",myid,jtagid,links[i]);
+				if (c > 2000 * 10)
+				{
+					write_sswitch_reg_no_ack_clean(myid,links[i],0x00800000);
+					write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
+				}
+				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
 			}
 
 			read_sswitch_reg(myid,links[i],tv);
 		}
-		//write_sswitch_reg_no_ack(myid,links[i],0x81020040);
-		//printf("%d[%d]:	0x%02x is up!\\n",myid,jtagid,links[i]);
 	}
-	/* Now do external links */
-	resetChans();
-	for (i = 4; i < nlinks; i += 1)
-	{
-		write_sswitch_reg_no_ack(myid,links[i],0x80020040);
-	}
-	return;
-	for (i = 4; i < nlinks; i += 1)
-	{
-		if (links[i] == 0x82) //First thing link A does it HELLO
-		{
-			write_sswitch_reg_no_ack(myid,links[i],0x81020040);
-			//printf("%d[%d]: Link A says hello in the first stage\\n",myid,jtagid);
-		}
-		else if (links[i] == 0x83) //First thing link B is wait on HELLO
-		{
-			tv = 0;
-			c = 0;
-			while((tv & 0x0c000000) != 0x04000000)
-			{
-				if (tv & 0x08000000)
-				{
-					printf("%d[%d]: FAIL\\n",myid,jtagid);
-					return;
-				}
-				read_sswitch_reg(myid,links[i],tv);
-				if (c++ > 200000)
-				{
-					printf("%d[%d]:	Link B gave up in first stage\\n",myid,jtagid);
-				}
-			}
-		}
-	}
-	for (i = 4; i < nlinks; i += 1)
-	{
-		if (links[i] == 0x83) //Second thing link A does it HELLO
-		{
-			write_sswitch_reg_no_ack(myid,links[i],0x81020040);
-			printf("%d[%d]: Link B says hello in the second stage\\n",myid,jtagid);
-		}
-		else if (links[i] == 0x82) //Second thing link B is wait on HELLO
-		{
-			tv = 0;
-			c = 0;
-			while((tv & 0x0c000000) != 0x04000000)
-			{
-				if (tv & 0x08000000)
-				{
-					printf("%d[%d]: FAIL IT\\n",myid,jtagid);
-					return;
-				}
-				read_sswitch_reg(myid,links[i],tv);
-				if (c++ > 200000)
-				{
-					printf("%d[%d]:	Link A gave up in first stage\\n",myid,jtagid);
-				}
-			}
-		}
-	}
-	//printf("%d[%d]:	DONE!\\n",myid,jtagid);
 """
 	return ret
 
@@ -367,32 +316,15 @@ for x in unused:
 	f = open(outdir + "scmain_" + str(x[1]) + ".xc","w")
 	print >> f,"/************* UNUSED CORE " + str(x[0]) + "***************/"
 	print >> f,initInitLinks(x[0]),endInitLinks(x[0])
-	print >> f,initMain(x[0]) + "		while(1);//asm(\"freet\"::);\n" + endMain(x[0])
+	print >> f,initMain(x[0]) + "		while(1) { asm(\"nop\"::); }//asm(\"freet\"::);\n" + endMain(x[0])
 	f.close()
 
 build = ""
 
 print "Now building..."
-i = 1
-ilim = len(coreToJtag)
 
-def compileXc(c):
-	cmd = "xcc -O0 -o" + outdir + "scmain_" + str(c[1]) + ".xe " + outdir + "scmain_" + str(c[1]) + ".xc ledtest.xc chan.S chan_c.c XMP16-unicore.xn"
-	subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE).communicate()
-
-#Parallel build!!!
-pool = multiprocessing.Pool(None)
-tasks = coreToJtag.items()
-r = pool.map_async(compileXc, tasks)
-r.wait() # Wait on the results
-
-for c in coreToJtag.items():
-	sec = subprocess.Popen(shlex.split("xesection " + outdir + "scmain_" + str(c[1]) + ".xe 1"), stdout=subprocess.PIPE).communicate()[0]
-	f = open(outdir + str(c[1]) + ".sec","w")
-	build += " " + outdir + str(c[1]) + ".sec"
-	f.write(sec)
-	f.close()
+subprocess.Popen(shlex.split("scmake.py " + outdir + " " + str(len(coreToJtag)) + " -O2 ledtest.xc chan.S chan_c.c"), stdout=subprocess.PIPE).communicate()[0]
 
 print "Done building!"
 
-subprocess.Popen(shlex.split("xebuilder.py " + build + " " + outdir + "a.xe"), stdout=subprocess.PIPE).communicate()[0]
+

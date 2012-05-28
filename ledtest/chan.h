@@ -23,6 +23,8 @@
 
 
 unsigned getChanend(unsigned dst);
+unsigned getLocalAnonChanend();
+unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned val);
 void resetChans(void);
 void cResetChans(unsigned myid);
 void txCloseChan(unsigned c);
