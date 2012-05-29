@@ -7,8 +7,8 @@
 /* __initLinks for core 7*/
 void __initLinks()
 {
-	unsigned myid = 7, jtagid= 7,i;
-	unsigned nlinks=6,tv,c0,c,d,linksetting = 0xc0000800;
+	unsigned myid = 7, jtagid= 7, i;
+	unsigned nlinks=6,tv,c,linksetting = 0xc0000800;
 	timer t;
 	unsigned links[6] = {0x84,0x86,0x85,0x87,0x82,0x83,};
 	/* Set my core ID */
@@ -66,7 +66,11 @@ void __initLinks()
 			read_sswitch_reg(myid,links[i],tv);
 		}
 	}
+	/* Now we declare any channels we need */
 
+	/* Give the channels long enough to setup */
+	t :> tv;
+	t when timerafter(tv + 10000000) :> void;
 	return;
 }
 
@@ -77,6 +81,7 @@ int main(void)
 	par
 	{
 		doled();
+		switchChat(0,32);
 
 	}
 	return 0;

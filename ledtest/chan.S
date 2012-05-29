@@ -1,8 +1,11 @@
 /* Thanks compiler */
 
 .section .text
+
 .cc_top getChanend.elim, getChanend
 .globl getChanend
+.global getChanend.nstackwords
+.linkset getChanend.nstackwords, 0
 .align 4
 getChanend:
 	getr r1,2
@@ -12,6 +15,46 @@ retGetChanend:
 	mov r0,r1
 	retsp 0
 .cc_bottom getChanend.elim
+
+.cc_top outUint.elim, outUint
+.globl outUint
+.global outUint.nstackwords
+.linkset outUint.nstackwords, 0
+.align 4
+outUint:
+	out res[r0],r1
+	retsp 0x0
+.cc_bottom outUint.elim
+
+.cc_top inUint.elim, inUint
+.globl inUint
+.global inUint.nstackwords
+.linkset inUint.nstackwords, 0
+.align 4
+inUint:
+	in r0,res[r0]
+	retsp 0x0
+.cc_bottom inUint.elim
+
+.cc_top closeChanend.elim, closeChanend
+.globl closeChanend
+.global closeChanend.nstackwords
+.linkset closeChanend.nstackwords, 0
+.align 4
+/* Tear down a channel, highest channel identifier goes first */
+closeChanend:
+	getd r1,res[r0]
+	lsu r1,r0,r1
+	bt r1,closeMeSecond
+	outct res[r0],1
+	chkct res[r0],1
+	bu closeEnd
+closeMeSecond:
+	chkct res[r0],1
+	outct res[r0],1
+closeEnd:
+	retsp 0x0
+.cc_bottom closeChanend.elim
 
 .cc_top getLocalAnonChanend.elim, getLocalAnonChanend
 .globl getLocalAnonChanend

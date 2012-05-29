@@ -21,13 +21,17 @@
 #define XLINK_G_DN XS1_L_SSWITCH_SLINK_4_NUM
 #define XLINK_H_DN XS1_L_SSWITCH_SLINK_5_NUM
 
+/* Redefine chanends, because we don't use the XC channel model */
+#define chanend unsigned
 
 unsigned getChanend(unsigned dst);
 unsigned getLocalAnonChanend();
 unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned val);
 void resetChans(void);
 void cResetChans(unsigned myid);
-void txCloseChan(unsigned c);
-void rxCloseChan(unsigned c);
+void closeChanend(unsigned c);
 void freeChanend(unsigned c);
+unsigned inUint(unsigned c);
+void outUint(unsigned c, unsigned val);
+
 #endif //_CHAN_H

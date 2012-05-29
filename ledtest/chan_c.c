@@ -32,21 +32,6 @@ unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned va
 	return ret;
 }
 
-void txCloseChan(unsigned c)
-{
-	unsigned t = XS1_CT_END;
-	asm("outct res[%0],%1"::"r"(c),"r"(t));
-	asm("inct %0,res[%1]":"=r"(t):"r"(c));
-}
-
-void rxCloseChan(unsigned c)
-{
-	unsigned t;
-	asm("inct %0,res[%1]":"=r"(t):"r"(c));
-	t = XS1_CT_END;
-	asm("outct res[%0],%1"::"r"(c),"r"(t));
-}
-
 void freeChanend(unsigned c)
 {
 	asm("freer res[%0]"::"r"(c));

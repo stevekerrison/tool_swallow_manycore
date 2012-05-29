@@ -124,8 +124,8 @@ def initInitLinks(core):
 /* __initLinks for core """ + str(core) + """*/
 void __initLinks()
 {
-	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """,i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c0,c,d,linksetting = 0xc0000800;
+	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c,linksetting = 0xc0000800;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -190,11 +190,15 @@ void __initLinks()
 			read_sswitch_reg(myid,links[i],tv);
 		}
 	}
+	/* Now we declare any channels we need */
 """
 	return ret
 
 def endInitLinks(core):
 	return """
+	/* Give the channels long enough to setup */
+	t :> tv;
+	t when timerafter(tv + 10000000) :> void;
 	return;
 }"""
 	
@@ -273,12 +277,7 @@ for a in allocs:
 	m = re.search(":\s*(\w+)\s*\((.*)\)\s*;",a);
 	fn = m.group(1)
 	args = [x.strip() for x in m.group(2).split(",")]
-	#Create a new function that passes encoded channel mappings to functions
-	#encoded as:
-	#0:4 - Local resource ID
-	#5:9 - Remote resource ID
-	#16:31 - Remote node ID
-	#Construct a valid resource identifier and do a SETD
+	#Setup the channel layer
 	if core in mains:
 		mains[core] += "		" + fn + "("
 	else:
@@ -289,12 +288,28 @@ for a in allocs:
 				mains[core] += ','
 		ref = re.sub("(\D)$","\g<1>0",re.sub("[\[\]]","",arg))
 		if ref in channelMappings:
-			dst = (channelMappings[ref]['cores'].pop(0) << 16)	\
-				| (channelMappings[ref]['chan'].pop(0) << 8) | 2;
+			cidx = channelMappings[ref]['cores'].index(core)
+			dst = (channelMappings[ref]['cores'][cidx] << 16)	\
+				| (channelMappings[ref]['chan'][cidx] << 8) | 2;
 			mains[core] += "0x%08x" % dst
 		else:
 			mains[core] += arg
 	mains[core] += ");\n"
+
+chans = {}
+for x in channelMappings:
+	for idx,y in enumerate(channelMappings[x]['cores']):
+		if y not in chans:
+			chans[y] = {}
+		otheridx = 1-idx
+		chans[y][channelMappings[x]['chan'][idx]] = (channelMappings[x]['cores'][otheridx] << 16)	\
+				| (channelMappings[x]['chan'][otheridx] << 8) | 2;
+
+for x in chans:
+	for y in sorted(chans[x]):
+		inits[x] += """
+	getChanend(""" + hex(chans[x][y]) + ");"
+
 
 for x in mains:
 	inits[x] = initInitLinks(x) + inits[x] + endInitLinks(x)
@@ -311,7 +326,7 @@ print "Total available cores:",str(len(coreToJtag))
 print "Num cores in use:",str(len(mains))
 
 unused = [(x,coreToJtag[x]) for x in coreToJtag if x not in mains]
-print "Unused cores (Node,JTAG) :",unused
+#print "Unused cores (Node,JTAG) :",unused
 for x in unused:
 	f = open(outdir + "scmain_" + str(x[1]) + ".xc","w")
 	print >> f,"/************* UNUSED CORE " + str(x[0]) + "***************/"
