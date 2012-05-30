@@ -4,11 +4,41 @@
 
 int main(void)
 {
-	chan c[2];
+	chan c[16];
+	par (int i = 0; i < 32; i += 2)
+	{
+		on stdcore[i]: commSpeed(c[i >> 1],i & 1);
+		on stdcore[i+1]: commSpeed(c[i >> 1],(i + 1) & 1);
+	}
+	/*par (int i = 0; i < 14; i += 1)
+	{
+		on stdcore[i]: commSpeed(d[i >> 1],i & 1);
+		on stdcore[i+2]: commSpeed(d[i >> 1],(i + 1) & 1);
+	}*/
+	/*par (int i = 0; i < 32; i += 4)
+	{
+		on stdcore[i]: doled();
+		on stdcore[i+3]: doled();
+	}*/
+	/*par
+	{
+		on stdcore[0]: commSpeed(c[0],0);
+		on stdcore[31]: commSpeed(c[0],1);
+	}*/
+#if 0
 	par
 	{
 		on stdcore[0]: doled();
-		//on stdcore[1]: commSpeed(c[1],0);
+		on stdcore[0]: commSpeed(c[0],0);
+		on stdcore[1]: commSpeed(c[0],1);
+		on stdcore[1]: commSpeed(c[1],0);
+		on stdcore[2]: commSpeed(c[1],1);
+		on stdcore[4]: commSpeed(c[2],0);
+		on stdcore[10]: commSpeed(c[2],1);
+		/*on stdcore[2]: commSpeed(c[2],0);
+		on stdcore[3]: commSpeed(c[2],1);
+		on stdcore[3]: commSpeed(c[3],0);
+		on stdcore[4]: commSpeed(c[3],1);*/
 		//on stdcore[1]: testComms(c[0],0);
 		on stdcore[3]: doled();
 		on stdcore[4]: doled();
@@ -17,7 +47,7 @@ int main(void)
 		on stdcore[11]: doled();
 		on stdcore[12]: doled();
 		on stdcore[15]: doled();
-		on stdcore[16]: doled();
+		/*on stdcore[16]: doled();
 		on stdcore[19]: doled();
 		on stdcore[20]: doled();
 		on stdcore[23]: doled();
@@ -25,10 +55,10 @@ int main(void)
 		on stdcore[27]: doled();
 		on stdcore[28]: doled();
 		//on stdcore[30]: commSpeed(c[1],1);
-		on stdcore[31]: doled();
+		on stdcore[31]: doled();*/
 		//on stdcore[31]: testComms(c[0],1);
 		//on stdcore[2]: switchChat(0,0);
-		on stdcore[0]: switchChat(0,32);
+		/*on stdcore[0]: switchChat(0,32);
 		on stdcore[1]: switchChat(0,32);
 		on stdcore[2]: switchChat(0,32);
 		on stdcore[3]: switchChat(0,32);
@@ -59,8 +89,8 @@ int main(void)
 		on stdcore[28]: switchChat(0,32);
 		on stdcore[29]: switchChat(0,32);
 		on stdcore[30]: switchChat(0,32);
-		on stdcore[31]: switchChat(0,32);
-		/*on stdcore[24]: switchChat(16,32);*/
+		on stdcore[31]: switchChat(0,32);*/
 	}
+#endif
 	return 0;
 }

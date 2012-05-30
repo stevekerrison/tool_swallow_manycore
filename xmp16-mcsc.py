@@ -125,7 +125,7 @@ def initInitLinks(core):
 void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c,linksetting = 0xc0000800;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c,linksetting = 0xc0002004;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -190,15 +190,56 @@ void __initLinks()
 			read_sswitch_reg(myid,links[i],tv);
 		}
 	}
+	//printf("%d[%d]: Now sync\\n",myid,jtagid);
+	/* Now wait for all cores to be ready using the undocumented scratch register*/
+	/*if (myid == 0)
+	{
+		tv = 0;
+		write_sswitch_reg_clean(0,0x3,0x1);
+		while(tv != """ + str(len(coreToJtag)) + """)
+		{
+			read_sswitch_reg(0,0x3,tv);
+		}
+	}
+	else
+	{
+		read_sswitch_reg(0,0x3,tv);
+		while(tv != myid)
+		{
+			read_sswitch_reg(0,0x3,tv);
+		}
+		write_sswitch_reg_clean(0,0x3,myid+1);
+		while(tv != """ + str(len(coreToJtag)) + """)
+		{
+			read_sswitch_reg(0,0x3,tv);
+		}
+	}*/
+	if (myid == 0)
+	{
+		write_sswitch_reg_clean(1,0x3,0x1);
+	}
+	read_sswitch_reg(myid,0x3,tv);
+	while(tv != 1)
+	{
+		read_sswitch_reg(myid,0x3,tv);
+	}
+	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x1);
+	if (myid == 0)
+	{
+		write_sswitch_reg_clean(1,0x3,0x2);
+	}
+	read_sswitch_reg(myid,0x3,tv);
+	while(tv != 2)
+	{
+		read_sswitch_reg(myid,0x3,tv);
+	}
+	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x2);
 	/* Now we declare any channels we need */
 """
 	return ret
 
 def endInitLinks(core):
 	return """
-	/* Give the channels long enough to setup */
-	t :> tv;
-	t when timerafter(tv + 10000000) :> void;
 	return;
 }"""
 	
@@ -218,23 +259,33 @@ def getChans(xc):
 chans = getChans(xc)
 print "Found %d channels declared" % sum([x[1] for x in chans])
 
-m = re.search("par(\s+\(.*\))?\s*\{(.*)\}\s+return",xc,re.M|re.S)
-replicator = m.group(1)
-allocator = m.group(2)
-
-istart = "i = 0"
-itest = "i < 1"
-istep = "i += 1"
-if replicator:
-	m = re.search("\s*int\s*(.*?);(.*?);\s*(.*?)\)",replicator,re.M)
-	istart,itest,istep = m.groups()
-
+m = re.findall("par(\s+\([^\{]*\))?\s*\{(.*?)\}",xc,re.M|re.S)
 allocs = ""
 
-exec(istart)
-while eval(itest):
-	allocs += re.sub("(?<!\w)i(?!\w)",str(i),allocator)
-	exec(istep)
+
+for x in m:
+	replicator = x[0]
+	allocator = x[1]
+
+	istart = "i = 0"
+	itest = "i < 1"
+	istep = "i += 1"
+	if replicator:
+		m = re.search("\s*int\s*(.*?);(.*?);\s*(.*?)\)",replicator,re.M)
+		istart,itest,istep = m.groups()
+
+	toEval = re.findall("(\[(.*?i.*?)\])",allocator);
+
+
+	exec(istart)
+	while eval(itest):
+		al = allocator
+		for x in toEval:
+			v = eval(x[1])
+			al = al.replace(x[0],"["+str(v)+"]",1)
+		allocs += re.sub("(?<!\w)i(?!\w)",str(i),al)
+		exec(istep)
+
 
 coreChanends = []
 channelMappings = {}
@@ -265,7 +316,7 @@ for a in allocs:
 
 
 print "Chanends used per core:",coreChanends
-print "Channel mappings:",channelMappings
+#print "Channel mappings:",channelMappings
 
 mains = {}
 inits = {}
@@ -331,7 +382,7 @@ for x in unused:
 	f = open(outdir + "scmain_" + str(x[1]) + ".xc","w")
 	print >> f,"/************* UNUSED CORE " + str(x[0]) + "***************/"
 	print >> f,initInitLinks(x[0]),endInitLinks(x[0])
-	print >> f,initMain(x[0]) + "		while(1) { asm(\"nop\"::); }//asm(\"freet\"::);\n" + endMain(x[0])
+	print >> f,initMain(x[0]) + "		asm(\"freet\"::);\n" + endMain(x[0])
 	f.close()
 
 build = ""

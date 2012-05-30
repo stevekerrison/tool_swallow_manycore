@@ -17,12 +17,27 @@ void cResetChans(unsigned myid)
 	return;
 }
 
-/* Something weird happens with */
+/* Something weird happens with channel allocation here */
 unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned val)
 {
 	unsigned ret = 0, c = getLocalAnonChanend(), d;
 	freeChanend(c);
 	ret = write_sswitch_reg_no_ack(node, reg, val);
+	d = getLocalAnonChanend();
+	if (d != c)
+	{
+		freeChanend(c);
+	}
+	freeChanend(d);
+	return ret;
+}
+
+/* Something weird happens with channel allocation here*/
+unsigned write_sswitch_reg_clean(unsigned node, unsigned reg, unsigned val)
+{
+	unsigned ret = 0, c = getLocalAnonChanend(), d;
+	freeChanend(c);
+	ret = write_sswitch_reg(node, reg, val);
 	d = getLocalAnonChanend();
 	if (d != c)
 	{

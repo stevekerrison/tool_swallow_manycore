@@ -27,6 +27,10 @@ void switchChat(unsigned i, unsigned max)
 		for (i = start; i < max; i++)
 		{
 			read_sswitch_reg(i,0x5,tv);
+			if (tv != i)
+			{
+				printf("%d: BAD node ID %x detected at %x\n",cid,tv,i);
+			}
 			x += tv;
 			//printf("%d: Switch %d says %d\n",cid,i,tv);
 			//printf("HI\n");
@@ -41,24 +45,38 @@ void switchChat(unsigned i, unsigned max)
 
 void commSpeed(chanend c, unsigned role)
 {
-	unsigned tv1, tv2;
+	unsigned tv1, tv2, tt, i = 0;
 	timer t;
-	if (role)
+	while(1)
 	{
-		closeChanend(c);
+		if (role)
+		{
+			//closeChanend(c);
+			t :> tv1;
+			outUint(c,0);
+			//closeChanend(c);
+			inUint(c);
+			t :> tv2;
+			tt += tv2-tv1;
+			if (++i == 8)
+			{
+				printf("0x%08x: Avg round trip time: %d refclocks\n",c,tt>>3);
+				return;
+			}
+		}
+		else
+		{
+			//closeChanend(c);
+			inUint(c);
+			//closeChanend(c);
+			outUint(c,1);
+			if (++i == 8)
+			{
+				return;
+			}
+		}
 		t :> tv1;
-		outUint(c,0);
-		closeChanend(c);
-		inUint(c);
-		t :> tv2;
-		printf("Trip time: %d refclocks\n",tv2-tv1);
-	}
-	else
-	{
-		closeChanend(c);
-		inUint(c);
-		closeChanend(c);
-		outUint(c,1);
+		t when timerafter(tv1 + 10000000) :> void;
 	}
 }
 
