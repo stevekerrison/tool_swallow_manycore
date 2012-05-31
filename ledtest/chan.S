@@ -54,7 +54,7 @@ inUint:
 /* Tear down a channel, highest channel identifier goes first */
 closeChanend:
 	getd r1,res[r0]
-	lsu r1,r0,r1
+	lsu r1,r1,r0
 	bt r1,closeMeSecond
 	outct res[r0],1
 	chkct res[r0],1

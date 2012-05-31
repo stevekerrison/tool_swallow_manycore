@@ -125,8 +125,7 @@ def initInitLinks(core):
 void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c, tv1, tv2, linksetting = 0xc0000800;
-	unsigned times["""+str(len(coreToJtag))+"""];
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c, linksetting = 0xc0000800;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -139,15 +138,17 @@ void __initLinks()
 	/* Zero out the link registers */
 	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
 	{
-		write_sswitch_reg_no_ack_clean(myid,i,0);
+		write_sswitch_reg_clean(myid,i,0);
 	}
 	/* Enable all links */
 	for (i = 0; i < nlinks; i += 1)
 	{
-		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
+		write_sswitch_reg_clean(myid,links[i],linksetting);
 	}
+	/* Give all other nodes a chance to activate their X-Links before we start
+		splatting tokens around */
 	t :> tv;
-	t when timerafter(tv + 10000000) :> void;
+	t when timerafter(tv + 2000000) :> void;
 """
 		
 	debug = False
@@ -164,114 +165,56 @@ void __initLinks()
 	
 	ret += """
 	/* Issue hello and wait for credit on active links */
-	for (i = 0; i < 4; i += 1)
-	{
-		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
-		tv = 0;
-		c = 0;
-		while((tv & 0x0e000000) != 0x06000000)
-		{
-			if (tv & 0x08000000)
-			{
-				printf ("%d[%d]:	LINK ERROR ON 0x%02x\\n",myid,jtagid,links[i]);
-				write_sswitch_reg_no_ack_clean(myid,links[i],0x00800000);
-				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
-				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
-			}
-			read_sswitch_reg(myid,links[i],tv);
-		}
-		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
-	}
-	/*for (i = 0; i < nlinks; i += 1)
-	{
-		write_sswitch_reg_clean(myid,links[i],linksetting | 0x00800000);
-	}
 	for (i = 0; i < nlinks; i += 1)
 	{
-		write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
-		tv = 0;
-		c = 0;
-		while((tv & 0x0e000000) != 0x06000000)
+		if (links[i] & 1)
 		{
-			if (tv & 0x08000000)
+			write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+			tv = 0;
+			while((tv & 0x0e000000) != 0x06000000)
 			{
-				printf ("%d[%d]:	LINK ERROR ON 0x%02x\\n",myid,jtagid,links[i]);
-				write_sswitch_reg_clean(myid,links[i],0x00800000);
-				write_sswitch_reg_clean(myid,links[i],linksetting);
-				write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+				read_sswitch_reg(myid,links[i],tv);
 			}
-			read_sswitch_reg(myid,links[i],tv);
 		}
-		//write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
-	}*/
-	//printf("%d[%d]: Now sync\\n",myid,jtagid);
-	/* Now wait for all cores to be ready using the undocumented scratch register */
-	if (myid == 0)
+		else
+		{
+			tv = 0;
+			while((tv & 0x0e000000) != 0x04000000)
+			{
+				read_sswitch_reg(myid,links[i],tv);
+			}
+			write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+			tv = 0;
+			while((tv & 0x0e000000) != 0x06000000)
+			{
+				read_sswitch_reg(myid,links[i],tv);
+			}
+		}
+	}
+	/* Using the a sswitch register as scratch, pass a token around in a couple of
+		directions until we achieve some semblance of syncronisation */
+	for (i = 1; i < 3; i += 1)
 	{
+		if (myid == 0)
+			write_sswitch_reg_clean(myid+1,0x3,i);
 		tv = 0;
-		write_sswitch_reg_clean(0,0x3,0x1);
-		while(tv != """ + str(len(coreToJtag)) + """)
-		{
-			read_sswitch_reg(0,0x3,tv);
-		}
-	}
-	else
-	{
-		read_sswitch_reg(0,0x3,tv);
-		while(tv != myid)
-		{
-			read_sswitch_reg(0,0x3,tv);
-		}
-		write_sswitch_reg_clean(0,0x3,myid+1);
-		while(tv != """ + str(len(coreToJtag)) + """)
-		{
-			read_sswitch_reg(0,0x3,tv);
-		}
-	}
-	/*if (myid == 0)
-	{
-		write_sswitch_reg_clean(1,0x3,0x1);
-	}
-	read_sswitch_reg(myid,0x3,tv);
-	while(tv != 1)
-	{
-		read_sswitch_reg(myid,0x3,tv);
-	}
-	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x1);*/
-	/*if (myid == 0)
-	{
-		tv = 0;
-		for (i = """ + str(len(coreToJtag)) + """ - 1; i >= 1; i -= 1)
-		{
-			t :> tv1;
-			write_sswitch_reg_clean(i,0x3,0x1);
-			t :> tv2;
-			tv += (tv2 - tv1);
-			write_sswitch_reg_clean(i,0x3,tv);
-		}
-		for (i = 1; i < """ + str(len(coreToJtag)) + """; i += 1)
-		{
-			write_sswitch_reg_clean(i,0x3,0x1);
-		}
-		t :> tv1;
-		t when timerafter(tv1 + tv + 40) :> void;
-	}
-	else
-	{
-		tv = 1;
-		while (tv == 1)
+		while (tv != i)
 		{
 			read_sswitch_reg(myid,0x3,tv);
 		}
-		//printf("%d[%d]: Got %u delay\\n",myid,jtagid,tv);
-		tv2 = tv;
-		while (tv != 1)
+		write_sswitch_reg_clean((myid+1)%"""+str(len(coreToJtag))+""",0x3,i);
+	}
+	for (i = 1; i < 3; i += 1)
+	{
+		if (myid == 0)
+			write_sswitch_reg_clean((myid-1)%"""+str(len(coreToJtag))+""",0x3,i);
+		tv = 0;
+		while (tv != i)
 		{
 			read_sswitch_reg(myid,0x3,tv);
 		}
-		t :> tv1;
-		t when timerafter(tv1 + tv2) :> void;
-	}*/
+		write_sswitch_reg_clean((myid-1)%"""+str(len(coreToJtag))+""",0x3,i);
+	}
 	/* Now we declare any channels we need */
 """
 	return ret
@@ -283,7 +226,7 @@ def endInitLinks(core):
 	
 	
 
-# This function contains all the reasons that I love Python
+# This function contains all the reasons that I love Python... and unfortunately a for loop with an if in it
 def getChans(xc):
 	m = re.findall("chan(\s+(\w+)\s*(\[\s*(\d+)\s*\])?)(\s*,?\s*(\w+)\s*(\[\s*(\d+)\s*\])?)*\s*",xc,re.M|re.S)
 	cvars = [item for sl in [x[1::4] for x in m] for item in sl]

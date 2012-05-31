@@ -85,7 +85,7 @@ void commSpeed(chanend c, unsigned role)
 		{
 			//closeChanend(c);
 			t :> tv1;
-			//outUint(c,0);
+			outUint(c,0);
 			//closeChanend(c);
 			inUint(c);
 			t :> tv2;
@@ -99,7 +99,7 @@ void commSpeed(chanend c, unsigned role)
 		else
 		{
 			//closeChanend(c);
-			//inUint(c);
+			inUint(c);
 			//closeChanend(c);
 			outUint(c,1);
 			if (++i == 8)

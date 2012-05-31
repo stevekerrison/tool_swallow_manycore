@@ -16,7 +16,7 @@ int main(void)
 	{
 		on stdcore[i]: switchChat(0,32);
 	}*/
-	par (int i = 0; i < 16; i += 2)
+	par (int i = 0; i < 32; i += 2)
 	{
 		on stdcore[i]: commSpeed(c[i >> 1],i & 1);
 		on stdcore[i+1]: commSpeed(c[i >> 1],(i + 1) & 1);
