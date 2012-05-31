@@ -125,7 +125,8 @@ def initInitLinks(core):
 void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c,linksetting = 0xc0002004;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c, tv1, tv2, linksetting = 0xc0000800;
+	unsigned times["""+str(len(coreToJtag))+"""];
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -145,6 +146,8 @@ void __initLinks()
 	{
 		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
 	}
+	t :> tv;
+	t when timerafter(tv + 10000000) :> void;
 """
 		
 	debug = False
@@ -161,7 +164,7 @@ void __initLinks()
 	
 	ret += """
 	/* Issue hello and wait for credit on active links */
-	for (i = 0; i < nlinks; i += 1)
+	for (i = 0; i < 4; i += 1)
 	{
 		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
 		tv = 0;
@@ -175,24 +178,35 @@ void __initLinks()
 				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
 				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
 			}
-			else if ((++c % 2000) == 0) //wait a while
-			{
-				//Hmmm, we haven't got full-duplex linkage, let's try again
-				//printf ("%d[%d]:	Link retry 0x%02x\\n",myid,jtagid,links[i]);
-				if (c > 2000 * 10)
-				{
-					write_sswitch_reg_no_ack_clean(myid,links[i],0x00800000);
-					write_sswitch_reg_no_ack_clean(myid,links[i],linksetting);
-				}
-				write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
-			}
-
 			read_sswitch_reg(myid,links[i],tv);
 		}
+		write_sswitch_reg_no_ack_clean(myid,links[i],linksetting | 0x01000000);
 	}
+	/*for (i = 0; i < nlinks; i += 1)
+	{
+		write_sswitch_reg_clean(myid,links[i],linksetting | 0x00800000);
+	}
+	for (i = 0; i < nlinks; i += 1)
+	{
+		write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+		tv = 0;
+		c = 0;
+		while((tv & 0x0e000000) != 0x06000000)
+		{
+			if (tv & 0x08000000)
+			{
+				printf ("%d[%d]:	LINK ERROR ON 0x%02x\\n",myid,jtagid,links[i]);
+				write_sswitch_reg_clean(myid,links[i],0x00800000);
+				write_sswitch_reg_clean(myid,links[i],linksetting);
+				write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+			}
+			read_sswitch_reg(myid,links[i],tv);
+		}
+		//write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+	}*/
 	//printf("%d[%d]: Now sync\\n",myid,jtagid);
-	/* Now wait for all cores to be ready using the undocumented scratch register*/
-	/*if (myid == 0)
+	/* Now wait for all cores to be ready using the undocumented scratch register */
+	if (myid == 0)
 	{
 		tv = 0;
 		write_sswitch_reg_clean(0,0x3,0x1);
@@ -213,8 +227,8 @@ void __initLinks()
 		{
 			read_sswitch_reg(0,0x3,tv);
 		}
-	}*/
-	if (myid == 0)
+	}
+	/*if (myid == 0)
 	{
 		write_sswitch_reg_clean(1,0x3,0x1);
 	}
@@ -223,17 +237,41 @@ void __initLinks()
 	{
 		read_sswitch_reg(myid,0x3,tv);
 	}
-	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x1);
-	if (myid == 0)
+	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x1);*/
+	/*if (myid == 0)
 	{
-		write_sswitch_reg_clean(1,0x3,0x2);
+		tv = 0;
+		for (i = """ + str(len(coreToJtag)) + """ - 1; i >= 1; i -= 1)
+		{
+			t :> tv1;
+			write_sswitch_reg_clean(i,0x3,0x1);
+			t :> tv2;
+			tv += (tv2 - tv1);
+			write_sswitch_reg_clean(i,0x3,tv);
+		}
+		for (i = 1; i < """ + str(len(coreToJtag)) + """; i += 1)
+		{
+			write_sswitch_reg_clean(i,0x3,0x1);
+		}
+		t :> tv1;
+		t when timerafter(tv1 + tv + 40) :> void;
 	}
-	read_sswitch_reg(myid,0x3,tv);
-	while(tv != 2)
+	else
 	{
-		read_sswitch_reg(myid,0x3,tv);
-	}
-	write_sswitch_reg_clean((myid+1) % """ + str(len(coreToJtag)) + """,0x3,0x2);
+		tv = 1;
+		while (tv == 1)
+		{
+			read_sswitch_reg(myid,0x3,tv);
+		}
+		//printf("%d[%d]: Got %u delay\\n",myid,jtagid,tv);
+		tv2 = tv;
+		while (tv != 1)
+		{
+			read_sswitch_reg(myid,0x3,tv);
+		}
+		t :> tv1;
+		t when timerafter(tv1 + tv2) :> void;
+	}*/
 	/* Now we declare any channels we need */
 """
 	return ret

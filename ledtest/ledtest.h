@@ -11,4 +11,8 @@ void testComms(chanend c, unsigned role);
 
 void commSpeed(chanend c, unsigned role);
 
+void latencyTest(unsigned len);
+
+void nonsense(unsigned x);
+
 #endif //_LEDTEST_H

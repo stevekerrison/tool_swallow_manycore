@@ -43,31 +43,63 @@ void switchChat(unsigned i, unsigned max)
 	}
 }
 
+void latencyTest(unsigned len)
+{
+	unsigned i, tv1, tv2, tmp, res[64];
+	timer t;
+	for (i = 0; i < len; i += 2)
+	{
+		t :> tv1;
+		read_sswitch_reg(i,0x5,tmp);
+		t :> tv2;
+		res[i] = tv2-tv1;
+	}
+	for (i = 1; i < len; i += 2)
+	{
+		t :> tv1;
+		read_sswitch_reg(i,0x5,tmp);
+		t :> tv2;
+		res[i] = tv2-tv1;
+	}
+	for (i = 0; i < len; i += 1)
+	{
+		printf("0x%03x: %d refticks\n",i,res[i]);
+	}
+}
+
+void nonsense(unsigned x)
+{
+	while(1)
+	{
+		asm("mov r1,r0"::);
+	}
+}
+
 void commSpeed(chanend c, unsigned role)
 {
 	unsigned tv1, tv2, tt, i = 0;
 	timer t;
 	while(1)
 	{
-		if (role)
+		if (!role)
 		{
 			//closeChanend(c);
 			t :> tv1;
-			outUint(c,0);
+			//outUint(c,0);
 			//closeChanend(c);
 			inUint(c);
 			t :> tv2;
 			tt += tv2-tv1;
 			if (++i == 8)
 			{
-				printf("0x%08x: Avg round trip time: %d refclocks\n",c,tt>>3);
+				printf("0x%08x: Avg trip time: %d refclocks\n",c,tt>>3);
 				return;
 			}
 		}
 		else
 		{
 			//closeChanend(c);
-			inUint(c);
+			//inUint(c);
 			//closeChanend(c);
 			outUint(c,1);
 			if (++i == 8)
