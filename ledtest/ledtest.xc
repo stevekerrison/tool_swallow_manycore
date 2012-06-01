@@ -37,7 +37,7 @@ void switchChat(unsigned i, unsigned max)
 		}
 		if (x > 0x1f0*20)
 		{
-			printf("%d:	Had a chat with all %d switches (%x)\n",cid,i,x);
+			//printf("%d:	Had a chat with all %d switches (%x)\n",cid,i,x);
 			x = 0;
 		}
 	}
@@ -77,7 +77,7 @@ void nonsense(unsigned x)
 
 void commSpeed(chanend c, unsigned role)
 {
-	unsigned tv1, tv2, tt, i = 0;
+	unsigned tv1, tv2, tt, i = 0, tests=32;
 	timer t;
 	while(1)
 	{
@@ -90,10 +90,9 @@ void commSpeed(chanend c, unsigned role)
 			inUint(c);
 			t :> tv2;
 			tt += tv2-tv1;
-			if (++i == 8)
+			if (++i == tests)
 			{
-				printf("0x%08x: Avg trip time: %d refclocks\n",c,tt>>3);
-				return;
+				break;
 			}
 		}
 		else
@@ -102,14 +101,16 @@ void commSpeed(chanend c, unsigned role)
 			inUint(c);
 			//closeChanend(c);
 			outUint(c,1);
-			if (++i == 8)
+			if (++i == tests)
 			{
 				return;
 			}
 		}
-		t :> tv1;
-		t when timerafter(tv1 + 10000000) :> void;
 	}
+	t :> tv1;
+	t when timerafter(tv1 + 0x08000000) :> void;
+	printf("0x%08x: Avg trip time: %d refclocks\n",c,tt/tests);
+	return;
 }
 
 void testComms(chanend c, unsigned role)

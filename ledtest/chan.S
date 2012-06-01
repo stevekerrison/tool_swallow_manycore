@@ -100,3 +100,15 @@ freeAllChans:
 	retsp 0x1
 .cc_bottom resetChans.elim
 
+.cc_top ledOut.elim, ledOut
+.globl ledOut
+.global ledOut.nstackwords
+.linkset ledOut.nstackwords, 0
+.align 4
+ledOut:
+	ldc r1,0x405
+	shl r1,r1,8
+	out res[r1],r0
+	retsp 0x0
+.cc_bottom ledOut.elim
+

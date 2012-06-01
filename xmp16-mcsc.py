@@ -131,6 +131,7 @@ void __initLinks()
 	for x in stw:
 		ret += hex(x) + ","
 	ret += """};
+	ledOut(1);
 	/* Set my core ID */
 	write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
@@ -149,6 +150,7 @@ void __initLinks()
 		splatting tokens around */
 	t :> tv;
 	t when timerafter(tv + 2000000) :> void;
+	ledOut(3);
 """
 		
 	debug = False
@@ -191,6 +193,7 @@ void __initLinks()
 			}
 		}
 	}
+	ledOut(7);
 	/* Using the a sswitch register as scratch, pass a token around in a couple of
 		directions until we achieve some semblance of syncronisation */
 	for (i = 1; i < 3; i += 1)
@@ -215,12 +218,18 @@ void __initLinks()
 		}
 		write_sswitch_reg_clean((myid-1)%"""+str(len(coreToJtag))+""",0x3,i);
 	}
+	t :> tv;
+	t when timerafter(tv + 200000) :> void;
 	/* Now we declare any channels we need */
 """
 	return ret
 
 def endInitLinks(core):
 	return """
+	ledOut(0xf);
+	t :> tv;
+	t when timerafter(tv + 200000) :> void;
+	ledOut(0x0);
 	return;
 }"""
 	
@@ -266,7 +275,6 @@ for x in m:
 			al = al.replace(x[0],"["+str(v)+"]",1)
 		allocs += re.sub("(?<!\w)i(?!\w)",str(i),al)
 		exec(istep)
-
 
 coreChanends = []
 channelMappings = {}

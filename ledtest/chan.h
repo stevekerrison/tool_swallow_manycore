@@ -34,5 +34,6 @@ void closeChanend(unsigned c);
 void freeChanend(unsigned c);
 unsigned inUint(unsigned c);
 void outUint(unsigned c, unsigned val);
+void ledOut(unsigned v);
 
 #endif //_CHAN_H
