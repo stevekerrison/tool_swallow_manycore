@@ -75,6 +75,23 @@ void nonsense(unsigned x)
 	}
 }
 
+void racetrack(chanend cin, chanend cout)
+{
+	unsigned cid = get_core_id();
+	unsigned char b = 1;
+	if (cid == 1)
+	{
+		outByte(cout,b);
+	}
+	while(1)
+	{
+		b = inByte(cin);
+		if (cid == 1) b++;
+		leds1 <: b;
+		outByte(cout,b);
+	}
+}
+
 void commSpeed(chanend c, unsigned role)
 {
 	unsigned tv1, tv2, tt, i = 0, tests=32;

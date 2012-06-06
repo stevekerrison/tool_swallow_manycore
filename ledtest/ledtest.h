@@ -15,4 +15,6 @@ void latencyTest(unsigned len);
 
 void nonsense(unsigned x);
 
+void racetrack(chanend cin, chanend cout);
+
 #endif //_LEDTEST_H

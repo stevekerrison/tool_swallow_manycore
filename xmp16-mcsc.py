@@ -126,12 +126,15 @@ void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
 	unsigned nlinks=""" + str(len(stw)) + """,tv,c, linksetting = 0xc0000800;
+	unsigned waittime = 50000 * """ + str(len(coreToJtag)) + """;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
 		ret += hex(x) + ","
 	ret += """};
 	ledOut(1);
+	/* Make sure scratch register is clear */
+	write_sswitch_reg_no_ack_clean(0,0x3,0);
 	/* Set my core ID */
 	write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
@@ -149,7 +152,7 @@ void __initLinks()
 	/* Give all other nodes a chance to activate their X-Links before we start
 		splatting tokens around */
 	t :> tv;
-	t when timerafter(tv + 2000000) :> void;
+	t when timerafter(tv + waittime) :> void;
 	ledOut(3);
 """
 		
@@ -194,9 +197,11 @@ void __initLinks()
 		}
 	}
 	ledOut(7);
+
 	/* Using the a sswitch register as scratch, pass a token around in a couple of
 		directions until we achieve some semblance of syncronisation */
-	for (i = 1; i < 3; i += 1)
+	//c = 0;
+	for (i = 1; i < 5; i += 1)
 	{
 		if (myid == 0)
 			write_sswitch_reg_clean(myid+1,0x3,i);
@@ -204,22 +209,15 @@ void __initLinks()
 		while (tv != i)
 		{
 			read_sswitch_reg(myid,0x3,tv);
+			/*if (c++ > 1000000)
+			{
+				printf("Core %d[%d] might be stuck on %d\\n",myid,jtagid,i);
+			}*/
 		}
 		write_sswitch_reg_clean((myid+1)%"""+str(len(coreToJtag))+""",0x3,i);
 	}
-	for (i = 1; i < 3; i += 1)
-	{
-		if (myid == 0)
-			write_sswitch_reg_clean((myid-1)%"""+str(len(coreToJtag))+""",0x3,i);
-		tv = 0;
-		while (tv != i)
-		{
-			read_sswitch_reg(myid,0x3,tv);
-		}
-		write_sswitch_reg_clean((myid-1)%"""+str(len(coreToJtag))+""",0x3,i);
-	}
 	t :> tv;
-	t when timerafter(tv + 200000) :> void;
+	t when timerafter(tv + waittime) :> void;
 	/* Now we declare any channels we need */
 """
 	return ret
@@ -228,7 +226,7 @@ def endInitLinks(core):
 	return """
 	ledOut(0xf);
 	t :> tv;
-	t when timerafter(tv + 200000) :> void;
+	t when timerafter(tv + waittime) :> void;
 	ledOut(0x0);
 	return;
 }"""
@@ -335,6 +333,9 @@ for a in allocs:
 		else:
 			mains[core] += arg
 	mains[core] += ");\n"
+
+print allocs
+sys.exit(0)
 
 chans = {}
 for x in channelMappings:
