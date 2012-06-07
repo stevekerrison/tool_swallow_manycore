@@ -75,19 +75,75 @@ void nonsense(unsigned x)
 	}
 }
 
-void racetrack(chanend cin, chanend cout)
+void mulkernela(void)
 {
-	unsigned cid = get_core_id();
+    register int a,b,c=0x55555555,d=0x5555555,e=0x5555555,f=0x5555555;
+    while(1)
+    {
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+    }
+}
+
+void mulkernelb(void)
+{
+    register int a,b,c=0xaaaaaaaa,d=0xaaaaaaaa,e=0xaaaaaaaa,f=0xaaaaaaaa;
+    while(1)
+    {
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+        asm("lmul %0,%1,%2,%3,%4,%5":"=r"(a),"=r"(b):"r"(c),"r"(d),"r"(e),"r"(f));
+    }
+}
+
+void racetrack(chanend cin, chanend cout, unsigned cid)
+{
 	unsigned char b = 1;
-	if (cid == 1)
+	timer t;
+	unsigned tv;
+	if (cid == 0 || cid == 79)
 	{
 		outByte(cout,b);
 	}
 	while(1)
 	{
 		b = inByte(cin);
-		if (cid == 1) b++;
+		if (cid == 0)
+		{
+			b = (b+1) & 0xf;
+			if (b == 0) b = 1;
+		}
 		leds1 <: b;
+		t :> tv;
+		t when timerafter(tv + 0x00200000) :> void;
+		leds1 <: 0;
 		outByte(cout,b);
 	}
 }

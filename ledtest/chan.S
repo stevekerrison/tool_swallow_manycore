@@ -69,7 +69,7 @@ inUint:
 inByte:
 	chkct res[r0],1
 	outct res[r0],1
-	in r1,res[r0]
+	int r1,res[r0]
 	chkct res[r0],1
 	outct res[r0],1
 	mov r0,r1

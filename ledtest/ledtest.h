@@ -15,6 +15,9 @@ void latencyTest(unsigned len);
 
 void nonsense(unsigned x);
 
-void racetrack(chanend cin, chanend cout);
+void racetrack(chanend cin, chanend cout, unsigned cid);
+
+void mulkernela(void);
+void mulkernelb(void);
 
 #endif //_LEDTEST_H

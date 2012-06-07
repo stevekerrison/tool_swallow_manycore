@@ -14,11 +14,11 @@ Author: Steve Kerrison <steve.kerrison@bristol.ac.uk>
 Created: 18th May 2012
 
 Usage:
-	xmp16-mcsc.py mcmain.xe boardconfig.brd [outputdir]
+	xmp16-mcsc.py mcmain.xe boardconfig.brd [extra options]
 
 Takes a multi-core main, tries to parse it and produce a set of single-core
 binaries that can be processed using the routing tables provided in boardconfig.
-If an outputdir is not specified, $PWD is used.
+Operates within $PWD
 """
 
 import sys,os,re,subprocess,shlex,multiprocessing
@@ -29,15 +29,14 @@ if len(sys.argv) < 3:
 
 pwd = os.getcwd()
 
-if len(sys.argv) == 4:
-	outdir = sys.argv[3] + "/"
-else:
-	outdir = pwd + "/"
+outdir = pwd + "/"
+
+additional_args = sys.argv[3:]
 
 includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
 
 # Use XCC's preprocessor to get the code
-xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "test.xn"], stdout=subprocess.PIPE).communicate()[0]
+xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
 
 # Capture the main block
@@ -334,8 +333,8 @@ for a in allocs:
 			mains[core] += arg
 	mains[core] += ");\n"
 
-print allocs
-sys.exit(0)
+#print allocs
+#sys.exit(0)
 
 chans = {}
 for x in channelMappings:
@@ -379,7 +378,9 @@ build = ""
 
 print "Now building..."
 
-subprocess.Popen(shlex.split("scmake.py " + outdir + " " + str(len(coreToJtag)) + " -O2 ledtest.xc chan.S chan_c.c"), stdout=subprocess.PIPE).communicate()[0]
+cmd = shlex.split("scmake.py " + outdir + " " + str(len(coreToJtag)));
+cmd.extend(additional_args)
+subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
 
 print "Done building!"
 
