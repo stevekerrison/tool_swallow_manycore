@@ -1,3 +1,13 @@
 *.sec
 scmain_*.xc
 *~
+doc/*.aux
+doc/*.bbl
+doc/*.blg
+doc/*.log
+doc/*.synctex.gz
+doc/*.nav
+doc/*.snm
+doc/*.out
+doc/*.toc
+doc/xmp16.pdf
