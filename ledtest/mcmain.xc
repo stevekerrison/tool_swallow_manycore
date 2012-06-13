@@ -1,8 +1,19 @@
-#include <platform.h>
+/*
+ * mcmain - A sample multicore main file for an XMP16 array
+ * 
+ * Copyright (C) 2012 Steve Kerrison <github@stevekerrison.com>
+ *
+ * This software is freely distributable under a derivative of the
+ * University of Illinois/NCSA Open Source License posted in
+ * LICENSE.txt and at <http://github.xcore.com/>
+ */
 
 //Required declaration in an XMP16 multicore main before #include mcsc_chan.h!
+#include <platform.h>
 #define MCMAIN
 #include "mcsc_chan.h"
+
+//Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
 #define NCORES 16
@@ -12,11 +23,11 @@ int main(void)
 	chan c[NCORES];
 	//chan d[17];
 	//Do some RTT testing between cores 15 *logical* nodes apart
-	par (int i = 0; i < NCORES; i += 1)
+	/*par (int i = 0; i < NCORES; i += 1)
 	{
 		on stdcore[i]: commSpeed(c[i],i & 1);
 		on stdcore[(i+15)%NCORES]: commSpeed(c[i],(i + 1) & 1);
-	}
+	}*/
 	/*
 	//Do some RTT testing between cores 1 *logical* node apart
 	par (int i = 0; i < NCORES; i += 1)
@@ -26,11 +37,11 @@ int main(void)
 	}*/
 
 	//Flash the LEDs on the appropriate cores (because not all cores have them)
-	par (int i = 0; i < NCORES; i += 4)
+	/*par (int i = 0; i < NCORES; i += 4)
 	{
 		on stdcore[i]: doled();
 		on stdcore[i+3]: doled();
-	}
+	}*/
 	/*
 	//Fill each core's pipeline with some CPU-burning code
 	par (int i = 0; i < NCORES; i += 1)
@@ -40,13 +51,13 @@ int main(void)
 		on stdcore[i]: mulkernela();
 		on stdcore[i]: mulkernelb();
 	}*/
-	/*
+	
 	//Splat some values out of the LEDs with a token passed around
 	par (int i = 0; i < (NCORES>>1); i += 2)
 	{
 		on stdcore[(i>>1)*4]: racetrack(c[i],c[i+1],(i>>1)*4);
 		on stdcore[((i>>1)*4)+3]: racetrack(c[i+1],c[(i+2)%(NCORES>>1)],((i>>1)*4)+3);
-	}*/
+	}
 	/*
 	//Next three par{}s: Circular LED racetrack (TODO: Generalise for NCORES != 80)
 	par (int i = 7; i < NCORES-4; i += 4)

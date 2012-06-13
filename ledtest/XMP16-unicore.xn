@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+Copyright (C) 2012 Steve Kerrison <github@stevekerrison.com>
+
+This software is freely distributable under a derivative of the
+University of Illinois/NCSA Open Source License posted in
+LICENSE.txt and at <http://github.xcore.com/>
+-->
 <Network xmlns="http://www.xmos.com"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
