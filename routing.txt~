@@ -1,6 +1,0 @@
-Node	Dirs	Direction 0 bits	Direction 1 bits	Link A dir	Link B dir	Link EFGH dir
-
-0000	DDRR	0..1			2..3			x		1		0
-0001	LLRL	0,2..3			1			x		1		0
-0010	RRLR	0,2..3			1			1		x		0
-0011	DDLL	0..1			2..3			x		1		0
