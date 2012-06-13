@@ -1,4 +1,4 @@
-XMOS XE section extractor
+XMP16 Manycore tools
 .......
 
 :Version:  0.0.1
