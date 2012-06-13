@@ -1,5 +1,5 @@
 *.sec
-scmain_*.xc
+scmain_*.x*
 *~
 doc/*.aux
 doc/*.bbl
