@@ -1,7 +1,7 @@
 #ifndef _LEDTEST_H
 #define _LEDTEST_H
 
-#include "chan.h"
+#include "mcsc_chan.h"
 
 void doled(void);
 

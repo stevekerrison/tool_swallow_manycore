@@ -1,6 +1,6 @@
 #include <xs1.h>
 #include <xccompat.h>
-#include "chan.h"
+#include "mcsc_chan.h"
 
 void cResetChans(unsigned myid)
 {

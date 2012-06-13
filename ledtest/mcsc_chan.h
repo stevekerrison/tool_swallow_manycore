@@ -1,5 +1,5 @@
-#ifndef _CHAN_H
-#define _CHAN_H
+#ifndef _MCSC_CHAN_H
+#define _MCSC_CHAN_H
 
 /* Switch registers... */
 /* XLINK_X_STW: Speed Timing and Width */
@@ -21,8 +21,27 @@
 #define XLINK_G_DN XS1_L_SSWITCH_SLINK_4_NUM
 #define XLINK_H_DN XS1_L_SSWITCH_SLINK_5_NUM
 
-/* Redefine chanends, because we don't use the XC channel model */
-#define chanend unsigned
+#ifdef MCMAIN
+	/* Redefine chanends, because we don't use the XC channel model in mains */
+	#define chanend unsigned
+#endif
+
+/* We can't have streaming chanends because it would make MC-SC conversion too
+ * complicated right now, so instead we provide these helpers. A block of
+ * stream{Out,In}{Byte,Word} calls should be surrounded by open{In,Out}Stream
+ * and close{In,Out}Stream. Bi-directional streams should be opened and closed
+ * in oen direction before the other (a closeOut should be matched by a closeIn
+ * at the other end of the channel). */
+#define openOutStream(c)	//Routes open themselves when data goes through
+#define streamOutByte(c,b) 	asm("outt res[%0],%1"::"r"(c),"r"(b));
+#define streamOutWord(c,w)	asm("out res[%0],%1"::"r"(c),"r"(w));
+#define closeOutStream(c)	asm("outct res[%0],1\n" \
+	"chkct res[%0],1" :: "r"(c));
+#define openInStream(c)		//Routes open themselves when data goes through
+#define streamInByte(c,b)	asm("int %0,res[%1]":"=r"(b):"r"(c));
+#define streamInWord(c,w)	asm("in %0,res[%1]":"=r"(w):"r"(c));
+#define closeInStream(c)	asm("chkct res[%0],1\n" \
+	"outct res[%0],1" :: "r"(c));
 
 unsigned getChanend(unsigned dst);
 unsigned getLocalAnonChanend();
@@ -30,7 +49,7 @@ unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned va
 unsigned write_sswitch_reg_clean(unsigned node, unsigned reg, unsigned val);
 void resetChans(void);
 void cResetChans(unsigned myid);
-void closeChanend(unsigned c);
+void closeChanend(chanend c);
 void freeChanend(unsigned c);
 unsigned inUint(unsigned c);
 void outUint(unsigned c, unsigned val);
@@ -38,4 +57,4 @@ unsigned char inByte(unsigned c);
 void outByte(unsigned c, unsigned char val);
 void ledOut(unsigned v);
 
-#endif //_CHAN_H
+#endif //_MCSC_CHAN_H

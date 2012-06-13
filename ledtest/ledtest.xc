@@ -1,6 +1,6 @@
 #include <platform.h>
-#include "chan.h"
 #include <stdio.h>
+#include "mcsc_chan.h"
 
 out port leds1 = XS1_PORT_4F;
 
@@ -130,11 +130,11 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 	unsigned tv;
 	if (cid == 0 || cid == 79)
 	{
-		outByte(cout,b);
+		cout <: b;
 	}
 	while(1)
 	{
-		b = inByte(cin);
+		cin :> b;
 		if (cid == 0)
 		{
 			b = (b+1) & 0xf;
@@ -144,23 +144,21 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 		t :> tv;
 		t when timerafter(tv + 0x00200000) :> void;
 		leds1 <: 0;
-		outByte(cout,b);
+		cout <: b;
 	}
 }
 
 void commSpeed(chanend c, unsigned role)
 {
-	unsigned tv1, tv2, tt, i = 0, tests=32;
+	unsigned tv1, tv2, tt, i = 0, tests=32, val;
 	timer t;
 	while(1)
 	{
 		if (!role)
 		{
-			//closeChanend(c);
 			t :> tv1;
-			outUint(c,0);
-			//closeChanend(c);
-			inUint(c);
+			c <: 0;
+			c :> val;
 			t :> tv2;
 			tt += tv2-tv1;
 			if (++i == tests)
@@ -170,10 +168,8 @@ void commSpeed(chanend c, unsigned role)
 		}
 		else
 		{
-			//closeChanend(c);
-			inUint(c);
-			//closeChanend(c);
-			outUint(c,1);
+			c :> val;
+			c <: 1;
 			if (++i == tests)
 			{
 				return;
@@ -197,10 +193,10 @@ void testComms(chanend c, unsigned role)
 		{
 			//tv += 100000;
 			//t when timerafter(tv) :> void;
-			closeChanend(c);
+			/*closeChanend(c);
 			outUint(c,val);
 			closeChanend(c);
-			val = inUint(c);
+			val = inUint(c);*/
 		}
 	}
 	else
@@ -209,11 +205,11 @@ void testComms(chanend c, unsigned role)
 		{
 			//tv += 100000;
 			//t when timerafter(tv) :> void;
-			closeChanend(c);
+			/*closeChanend(c);
 			val = inUint(c);
 			if ((val & 0xfffff) == 0xfffff ) printf("0x%08x\n",val);
 			outUint(c,val + 1);
-			closeChanend(c);
+			closeChanend(c);*/
 		}
 	}
 }
