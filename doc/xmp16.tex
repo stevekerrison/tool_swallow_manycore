@@ -15,10 +15,25 @@
 \begin{document}
 \title{Technical Note: XMP16 many-core research board}
 \author{Steve Kerrison}
-\date{11th June 2012}
+\date{14th June 2012}
 \maketitle
 
 This technical note is intended as a brief description of the University of Bristol \& XMOS ``XMP16'' many-core research boards, how to assemble them, how to write programs for them and how to run them. The boards and supporting tools are a work in progress. It is the responsibility of anyone who extends the tools to update this note accordingly, or produce a new, more in-depth set of documentation.
+
+\subsection{Change log}
+
+\paragraph{14th June 2012}
+\begin{itemize}
+\item Update some library filenames to reflect new structure
+\item Refer to repositories for tools
+\item Change channel usage instructions now that we can use regular channel symbols.
+\end{itemize}
+
+\paragraph{11th June 2012}
+
+\begin{itemize}
+\item Initial version.
+\end{itemize}
 
 \section{XMP16 research board}
 
@@ -36,8 +51,9 @@ The boards contain eight XMOS XS1-L2 dual-core chips, capable of operating at 50
 
 \subsection{Key information}
 
-Here we define some key elements of the operating characteristics of the boards.
+Table \ref{tab:keyinfo} defines some key elements of the operating characteristics of the boards.
 
+\begin{table}
 \begin{tabular}{|c|c|p{2.5in}|}
 \hline 
 \textbf{Feature} & \textbf{Desc.} & \textbf{Detail} \\ 
@@ -53,6 +69,9 @@ Power supply & 12V @ ~2A & Power dissipation is workload \& freq. dependant. \\
 JTAG & Via XTAG2 connector & Key should face into the board. \\
 \hline 
 \end{tabular}
+\caption{Key information on the XMP16}
+\label{tab:keyinfo}
+\end{table}
 
 \section{Physical configuration}
 
@@ -129,12 +148,14 @@ The following tools are required to program for an array of XMP16s:
 \item \texttt{xebuilder.py} - A tool to assemble a many-core XE file from extracted sections.
 \item \texttt{xmp16-routegen.py} - A script to generate routing tables and JTAG mappings for any given XMP16 array.
 \item \texttt{xmp16-mcsc.py} - The multi-core to single-core compiler wrapper, providing reasonable compatibility with existing XMOS multi-core programming paradigms.
-\item \texttt{chan.h}, \texttt{chan.S} and \texttt{chan\_c.c} - Helper library for channel communication over the many-core mesh.
+\item \texttt{mcsc\_chan.h}, \texttt{mcsc\_chan.S} and \texttt{mcsc\_chan\_c.c} - Helper library for initialisig the many-core mesh and providing some channel communication helpers where necessary.
 \item \texttt{XMP16-unicore.xn} - An XN file that describes a \textbf{single core} of an XMP16 board. Used by the parallel build stage.
 \item \texttt{manycore.xn} - A skeleton XN file declaring over 2bn cores for use in preprocessing the many-core main file.
 \end{itemize}
 
 The XMOS tools and the additional wrapper scripts should be located somewhere within your PATH in order for them to function.
+
+The above scripts and libraries are part of the \texttt{tool\_xmp16\_manycore} project. The program \texttt{xesection} is part of a separate project; it is included in git as a submodule.
 
 \subsection{Using the tools}
 
@@ -152,15 +173,17 @@ An XMOS multi-core main file usually contains a \texttt{par} statement, within w
 
 \texttt{xmp16-mcsc.py} takes a similarly formatted multi-core main, splits it into a single-core main file per-core and inserts code required to bring up and configure the network on each core before continuing execution.
 
-A multi-core main file should contain \texttt{\#include "chan.h"} so that channels are handled correctly by the wrappers. For the XMP16, multi-core mains can contain multiple \texttt{par} statements and even multiple replicated statements. However, the index must be i for every replicated \texttt{par} and the terms of the replicator should be interpretable by the python script (e.g. \texttt{par (int i = 0; i < 32; i += 1)} rather than \texttt{par (int i = 0; i < 32; i++)})
+A multi-core main file should contain \texttt{\#define MCMAIN} followed by \texttt{\#include "mcsc\_chan.h"} so that channels are handled correctly by the wrappers. Platform-wide includes such as \texttt{platform.h} should be included \textit{before} this, whereas include files for other project components should be included afterwards. This will fixup channel definitions without breakig platform libraries.
 
-Declaration of channels using \texttt{chan} are done in the same way as with the regular XMOS tools. However, chanends are translated into \texttt{unsigned int}s by \texttt{chan.h} and \texttt{xmp16-mcsc.py}. As such, the regular channel operators \texttt{<:} and \texttt{:>} do not work. However, helper macros have been included in \texttt{chan.h} for outputting and inputting words and bytes.
+For the XMP16, multi-core mains can contain multiple \texttt{par} statements and even multiple replicated statements. However, the index must be i for every replicated \texttt{par} and the terms of the replicator should be interpretable by the python script, e.g. \texttt{par (int i = 0; i < 32; i += 1)} rather than \texttt{par (int i = 0; i < 32; i++)}.
+
+Declaration of channels using \texttt{chan} are done in the same way as with the regular XMOS tools. However, chanends are translated into \texttt{unsigned int}s by \texttt{mcsc\_chan.h} and \texttt{xmp16-mcsc.py}. Compatibility is maintained with regular channel communication symbols (\texttt{<:} and \texttt{:>}). The compatibility layer only supports the \textit{calling} of functions that use channels from the multi-core main. The functions that actually \textit{use} the channels should be declared in a separate file.
 
 \subsubsection{Building for the XMP16 array}
 
 With a correctly written multi-core main, simply run  \texttt{xmp16-mcsc.py multicoremain.xc board.cfg [additional xcc arguments]}. The additional arguments may include optimisation flags, include paths, other source files to compile and so on, but the multi core main file and board configuration file should always come first in the argument list.
 
-Currently \texttt{xmp16-mcsc.py} generates a number of \texttt{.sec}, \texttt{.xc} and \texttt{.xe} files. These can be useful for debugging although they may be scrubbed by default in a later update to the code. The final compiled XE file is currently output as \texttt{a.xe} in the present working directory.
+Currently \texttt{xmp16-mcsc.py} generates a number of \texttt{.sec}, \texttt{.xc} and \texttt{.xe} files. These can be useful for debugging although they may be scrubbed by default in a later update to the code. The final compiled XE file is output as \texttt{a.xe} in the present working directory, although this can be overridden with the standard \texttt{-o} parameter.
 
 \subsubsection{Running and debugging}
 
@@ -179,8 +202,7 @@ The topology of the network is a little unusual (a diagram will be provided in d
 The following issues and features will be worked on and added to the toolkit in due course.
 
 \begin{itemize}
-\item Channel event wait support through XC \texttt{select} or equivalent through \texttt{chan.h}.
-\item Streaming chanend helpers in \texttt{chan.h}
+\item Streaming chanend helpers in \texttt{mcsc\_chan.h}
 \item Full support for one or more DRAM/flash expansion boards
 \item Booting over XLink
 \item XScope support
