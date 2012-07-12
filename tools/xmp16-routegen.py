@@ -99,6 +99,7 @@ xmemboard = int(M)
 
 xboards = len(config[0])
 yboards = len(config)
+numcores = xboards * yboards * 16
 
 xbits = int(math.ceil(math.log(xboardnodes)/math.log(2)))
 yboardbits = int(math.ceil(math.log(yboardnodes)/math.log(2)))
@@ -106,9 +107,6 @@ ybits = int(math.ceil(math.log(yboards)/math.log(2)))
 zbits = int(math.ceil(math.log(xboards+xmemboard)/math.log(2)))
 boardbits = xbits + yboardbits
 totalbits = boardbits+ybits+zbits
-
-#print xbits,yboardbits
-#print ybits,zbits
 
 def calcdirs(lst,data,width,dirs):
 	for b in range(width):
@@ -169,6 +167,8 @@ def memboard(y,z,c):
 		print hex(dirreg+k),"=",hex(d)
 	print "# MEMORY BOARD END"
 	print "# Resuming XMP16 board..."
+	
+print "DIM = %d(%d)x%d(%d)" % (yboards,ybits,xboards,zbits)
 
 for y in range(yboards):
 	for z in range(xboards):
@@ -177,7 +177,7 @@ for y in range(yboards):
 			sys.exit(2)
 		#print y,z
 		print
-		print "#new board"
+		print "#new board, position",y,z
 		for c in range(boardnodes):
 			nodeid = c | (y << boardbits) | (z << (boardbits + ybits))
 
