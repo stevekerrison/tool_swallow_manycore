@@ -16,7 +16,7 @@ Author: Steve Kerrison <steve.kerrison@bristol.ac.uk>
 Created: 18th May 2012
 
 Usage:
-	xmp16-mcsc.py mcmain.xe boardconfig.brd [extra options]
+	xmp16-mcsc.py mcmain.xc boardconfig.brd [extra options]
 
 Takes a multi-core main, tries to parse it and produce a set of single-core
 binaries that can be processed using the routing tables provided in boardconfig.
@@ -74,6 +74,15 @@ def arrLen(s):
 def parseBoardConfig(bc):
 	cfg = {}
 	global coreToJtag
+	dims = bc.splitlines()[0]
+	m = re.match("^DIM\s*=\s*([0-9]+)\(([0-9]+)\)x([0-9]+)\(([0-9]+)\)",dims)
+	if not m:
+	  print >> sys.stderr, "WARNING: Dimension data not found. Config compatibility degraded"
+	  dims = None
+	else:
+	  dims = [(m.group(1),m.group(2)),(m.group(3),m.group(4))]
+	#print dims
+	#sys.exit(0)
 	percore = [filter(None,x.splitlines()) for x in bc.split("JTAG Node")]
 	pattern = "^(0x[0-9a-f]+)\s*=\s*(0x[0-9a-f]+)"
 	for c in percore[1:]:
@@ -89,9 +98,15 @@ def parseBoardConfig(bc):
 				for x in [int(x,16) for x in l.split(" ")[1:]]:
 					cfg[jtagid][x] = 0x80000000
 		coreToJtag[cfg[jtagid][5]] = jtagid
+		#print "adding JTAG ID",jtagid,"to",cfg[jtagid][5]
 	return cfg
 
 bc = parseBoardConfig(open(sys.argv[2],"r").read())
+
+#print bc
+#print coreToJtag
+
+#sys.exit(0)
 
 def initMain(core):
 	return "\n/* Main for core " + str(core) + """*/
@@ -126,8 +141,9 @@ def initInitLinks(core):
 void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-	unsigned nlinks=""" + str(len(stw)) + """,tv,c, linksetting = 0xc0000800;
-	unsigned waittime = 50000 * """ + str(len(coreToJtag)) + """;
+	unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
+	//unsigned waittime = 5000000 * """ + str(len(coreToJtag)) + """;
+	unsigned waittime = 5000000;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -202,7 +218,7 @@ void __initLinks()
 	/* Using the a sswitch register as scratch, pass a token around in a couple of
 		directions until we achieve some semblance of syncronisation */
 	//c = 0;
-	for (i = 1; i < 5; i += 1)
+	/*for (i = 1; i < 50; i += 1)
 	{
 		if (myid == 0)
 			write_sswitch_reg_clean(myid+1,0x3,i);
@@ -210,15 +226,49 @@ void __initLinks()
 		while (tv != i)
 		{
 			read_sswitch_reg(myid,0x3,tv);
-			/*if (c++ > 1000000)
-			{
-				printf("Core %d[%d] might be stuck on %d\\n",myid,jtagid,i);
-			}*/
 		}
 		write_sswitch_reg_clean((myid+1)%"""+str(len(coreToJtag))+""",0x3,i);
+	}*/
+	if (myid == 0)
+	{
+	  c = 1;
+	  while (c < """+str(len(coreToJtag))+""")
+	  {
+	    //printf("Got %x\\n",c);
+	    write_sswitch_reg_clean(c,0x3,1);
+	    while (tv != c)
+	    {
+	      read_sswitch_reg(0,0x3,tv);
+	    }
+	    c++;
+	  }
+	  write_sswitch_reg_clean(0,0x3,c);
 	}
+	else
+	{
+	  tv = 0;
+	  while (tv != 1)
+	  {
+	    read_sswitch_reg(myid,0x3,tv);
+	  }
+	  write_sswitch_reg_clean(0,0x3,myid);
+	  tv = 0;
+	  while(tv < """+str(len(coreToJtag))+""")
+	  {
+	    read_sswitch_reg(0,0x3,tv);
+	  }
+	}
+	ledOut(6);
 	t :> tv;
 	t when timerafter(tv + waittime) :> void;
+	/* Now grab a couple of temporary channels*/
+	c = getChanend(("""+str((core+(len(coreToJtag)/2))%len(coreToJtag))+"""<<16) | 0x0002);
+	t :> tv;
+	t when timerafter(tv + waittime) :> void;
+	closeChanend(c);
+	freeChanend(c);
+	cResetChans(myid);
+	
 	/* Now we declare any channels we need */
 """
 	return ret
@@ -350,7 +400,7 @@ for x in channelMappings:
 for x in chans:
 	for y in sorted(chans[x]):
 		inits[x] += """
-	getChanend(""" + hex(chans[x][y]) + ");"
+	if (!getChanend(""" + hex(chans[x][y]) + ")) printf(\"FAIL\\n\");"
 
 
 for x in mains:

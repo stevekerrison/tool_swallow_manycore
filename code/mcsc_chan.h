@@ -70,5 +70,7 @@ void outUint(unsigned c, unsigned val);
 unsigned char inByte(unsigned c);
 void outByte(unsigned c, unsigned char val);
 void ledOut(unsigned v);
+unsigned getRemoteChanendId(chanend c);
+unsigned getLocalChanendId(chanend c);
 
 #endif //_MCSC_CHAN_H

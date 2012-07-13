@@ -31,6 +31,7 @@ if len(sys.argv) < 3:
 workdir = sys.argv[1]
 os.chdir(workdir)
 
+
 print "Now building..."
 build = ""
 ilim = int(sys.argv[2])
@@ -51,7 +52,7 @@ else:
 extraargs = sys.argv[3:]
 
 def compileXc(c):
-	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc XMP16-unicore.xn"
+	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc mcsc_chan.S mcsc_chan_c.c XMP16-unicore.xn"
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
 	subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()

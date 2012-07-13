@@ -32,4 +32,6 @@ void racetrack(chanend cin, chanend cout, unsigned cid);
 void mulkernela(void);
 void mulkernelb(void);
 
+void fourByFour(chanend a, chanend b, chanend c, chanend d);
+
 #endif //_LEDTEST_H

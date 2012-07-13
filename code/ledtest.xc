@@ -33,7 +33,7 @@ void doled(void)
 
 void switchChat(unsigned i, unsigned max)
 {
-	unsigned start = i,tv,x,cid = get_core_id();
+	unsigned start = i,tv,x;//,cid = get_core_id();
 	while(1)
 	{
 		for (i = start; i < max; i++)
@@ -41,7 +41,7 @@ void switchChat(unsigned i, unsigned max)
 			read_sswitch_reg(i,0x5,tv);
 			if (tv != i)
 			{
-				printf("%d: BAD node ID %x detected at %x\n",cid,tv,i);
+				//printf("%d: BAD node ID %x detected at %x\n",cid,tv,i);
 			}
 			x += tv;
 			//printf("%d: Switch %d says %d\n",cid,i,tv);
@@ -140,6 +140,9 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 	unsigned char b = 1;
 	timer t;
 	unsigned tv;
+	printf("Chanend cin: %08x <-> %08x\n",getLocalChanendId(cin),getRemoteChanendId(cin));
+	printf("Chanend cout: %08x <-> %08x\n",getLocalChanendId(cout),getRemoteChanendId(cout));
+	return;
 	if (cid == 0 || cid == 79)
 	{
 		cout <: b;
@@ -164,6 +167,8 @@ void commSpeed(chanend c, unsigned role)
 {
 	unsigned tv1, tv2, tt, i = 0, tests=32, val;
 	timer t;
+	printf("Chanend c: %08x <-> %08x\n",getLocalChanendId(c),getRemoteChanendId(c));
+	return;
 	while(1)
 	{
 		if (!role)
@@ -172,7 +177,8 @@ void commSpeed(chanend c, unsigned role)
 			c <: 0;
 			c :> val;
 			t :> tv2;
-			tt += tv2-tv1;
+			//if (i > 0) //Skip the first test to allow logical links to settle
+  			tt += tv2-tv1;
 			if (++i == tests)
 			{
 				break;

@@ -28,6 +28,25 @@ retGetChanend:
 	retsp 0
 .cc_bottom getChanend.elim
 
+.cc_top getRemoteChanendId.elim, getRemoteChanendId
+.globl getRemoteChanendId
+.global getRemoteChanendId.nstackwords
+.linkset getRemoteChanendId.nstackwords, 0
+.align 4
+getRemoteChanendId:
+	getd r0,res[r0]
+	retsp 0
+.cc_bottom getRemoteChanendId.elim
+
+.cc_top getLocalChanendId.elim, getLocalChanendId
+.globl getLocalChanendId
+.global getLocalChanendId.nstackwords
+.linkset getLocalChanendId.nstackwords, 0
+.align 4
+getLocalChanendId:
+	retsp 0
+.cc_bottom getLocalChanendId.elim
+
 .cc_top outUint.elim, outUint
 .globl outUint
 .global outUint.nstackwords
@@ -96,8 +115,8 @@ inByte:
 /* Tear down a channel, highest channel identifier goes first */
 closeChanend:
 	getd r1,res[r0]
-	lsu r1,r1,r0
-	bt r1,closeMeSecond
+	lsu r2,r1,r0
+	bt r2,closeMeSecond
 	outct res[r0],1
 	chkct res[r0],1
 	bu closeEnd
@@ -119,6 +138,8 @@ getLocalAnonChanend:
 .cc_bottom getLocalAnonChanend.elim
 
 .cc_top resetChans.elim, resetChans
+.global resetChans.nstackwords
+.linkset resetChans.nstackwords, 1
 .globl resetChans
 .align 4
 resetChans:
