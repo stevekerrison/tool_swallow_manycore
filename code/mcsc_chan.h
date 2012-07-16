@@ -61,13 +61,6 @@ unsigned getChanend(unsigned dst);
 unsigned getLocalAnonChanend();
 unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned val);
 unsigned write_sswitch_reg_clean(unsigned node, unsigned reg, unsigned val);
-#ifdef __XC__
-  unsigned read_sswitch_reg_clean(unsigned node, unsigned reg, unsigned &val);
-#else
-  unsigned read_sswitch_reg_clean(unsigned node, unsigned reg, unsigned *val);
-#endif
-void resetChans(void);
-void cResetChans(unsigned myid);
 void closeChanend(chanend c);
 void freeChanend(unsigned c);
 unsigned inUint(unsigned c);

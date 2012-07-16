@@ -142,7 +142,6 @@ void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
 	unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
-	//unsigned waittime = 5000000 * """ + str(len(coreToJtag)) + """;
 	unsigned waittime = 5000000;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
@@ -154,9 +153,6 @@ void __initLinks()
 	write_sswitch_reg_no_ack_clean(0,0x3,0);
 	/* Set my core ID */
 	write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
-	/* Make sure all channels unallocated */
-	//cResetChans(0);
-	//cResetChans(myid);
 	/* Zero out the link registers */
 	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
 	{
@@ -215,20 +211,6 @@ void __initLinks()
 		}
 	}
 	ledOut(7);
-	/* Using the a sswitch register as scratch, pass a token around in a couple of
-		directions until we achieve some semblance of syncronisation */
-	//c = 0;
-	/*for (i = 1; i < 50; i += 1)
-	{
-		if (myid == 0)
-			write_sswitch_reg_clean(myid+1,0x3,i);
-		tv = 0;
-		while (tv != i)
-		{
-			read_sswitch_reg(myid,0x3,tv);
-		}
-		write_sswitch_reg_clean((myid+1)%"""+str(len(coreToJtag))+""",0x3,i);
-	}*/
 	if (myid == 0)
 	{
 	  c = 1;
@@ -259,15 +241,15 @@ void __initLinks()
 	  }
 	}
 	ledOut(6);
+	
 	t :> tv;
 	t when timerafter(tv + waittime) :> void;
-	/* Now grab a couple of temporary channels*/
+	/* Now grab a channel on the other side of the board to test things out */
 	c = getChanend(("""+str((core+(len(coreToJtag)/2))%len(coreToJtag))+"""<<16) | 0x0002);
 	t :> tv;
 	t when timerafter(tv + waittime) :> void;
 	closeChanend(c);
 	freeChanend(c);
-	//cResetChans(myid);
 	
 	/* Now we declare any channels we need */
 """
