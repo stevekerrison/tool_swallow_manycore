@@ -16,12 +16,12 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 4
+#define NCORES 112
 
 int main(void)
 {
 
-	chan c[NCORES*2];
+	chan c[NCORES];
 	//Do some RTT testing between cores 15 *logical* nodes apart
 	/*par (int i = 0; i < NCORES; i += 1)
 	{
@@ -30,11 +30,11 @@ int main(void)
 	}*/
 	
 	//Do some RTT testing between cores 1 *logical* node apart
-	par (int i = 0; i < NCORES; i += 1)
+	/*par (int i = 0; i < NCORES; i += 1)
 	{
 		on stdcore[i]: commSpeed(c[i+NCORES],i & 1);
 		on stdcore[(i+1)%NCORES]: commSpeed(c[i+NCORES],(i + 1) & 1);
-	}
+	}*/
 
 	//Flash the LEDs on the appropriate cores (because not all cores have them)
 	/*par (int i = 0; i < NCORES; i += 4)
@@ -44,13 +44,13 @@ int main(void)
 	}*/
 	
 	//Fill each core's pipeline with some CPU-burning code
-	/*par (int i = 0; i < NCORES; i += 1)
+	par (int i = 0; i < NCORES; i += 1)
 	{
 		on stdcore[i]: mulkernela();
 		on stdcore[i]: mulkernelb();
 		on stdcore[i]: mulkernela();
 		on stdcore[i]: mulkernelb();
-	}*/
+	}
 	
 	//Splat some values out of the LEDs with a token passed around
 	par (int i = 0; i < (NCORES>>1); i += 2)
@@ -62,10 +62,10 @@ int main(void)
 	//Generate traffic between switches. This loads up the network a lot.
 	//Ideally nothing should crash. At the moment it causes ET_ILLEGAL_RESOURCE
 	//sometimes. Obvious TODO: FIXME!
-	/*par (int i = 0; i < NCORES; i += 1)
+  par (int i = 0; i < NCORES; i += 1)
 	{
 	  on stdcore[i]: switchChat(0,NCORES);
-	}*/
+	}
 	/*
 	//Next three par{}s: Circular LED racetrack (TODO: Generalise for NCORES != 80)
 	par (int i = 7; i < NCORES-4; i += 4)

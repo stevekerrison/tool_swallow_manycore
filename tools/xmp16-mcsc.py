@@ -155,7 +155,8 @@ void __initLinks()
 	/* Set my core ID */
 	write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
 	/* Make sure all channels unallocated */
-	cResetChans(myid);
+	//cResetChans(0);
+	//cResetChans(myid);
 	/* Zero out the link registers */
 	for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
 	{
@@ -214,7 +215,6 @@ void __initLinks()
 		}
 	}
 	ledOut(7);
-
 	/* Using the a sswitch register as scratch, pass a token around in a couple of
 		directions until we achieve some semblance of syncronisation */
 	//c = 0;
@@ -267,7 +267,7 @@ void __initLinks()
 	t when timerafter(tv + waittime) :> void;
 	closeChanend(c);
 	freeChanend(c);
-	cResetChans(myid);
+	//cResetChans(myid);
 	
 	/* Now we declare any channels we need */
 """
@@ -400,7 +400,7 @@ for x in channelMappings:
 for x in chans:
 	for y in sorted(chans[x]):
 		inits[x] += """
-	if (!getChanend(""" + hex(chans[x][y]) + ")) printf(\"FAIL\\n\");"
+	if (!getChanend(""" + hex(chans[x][y]) + ")) printf(\"FAIL for dst %08x\\n\"," + hex(chans[x][y]) + ");"
 
 
 for x in mains:

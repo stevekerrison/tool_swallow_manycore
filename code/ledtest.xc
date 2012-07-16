@@ -140,10 +140,10 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 	unsigned char b = 1;
 	timer t;
 	unsigned tv;
-	printf("Chanend cin: %08x <-> %08x\n",getLocalChanendId(cin),getRemoteChanendId(cin));
-	printf("Chanend cout: %08x <-> %08x\n",getLocalChanendId(cout),getRemoteChanendId(cout));
-	return;
-	if (cid == 0 || cid == 79)
+	//printf("Chanend cin: %08x <-> %08x\n",getLocalChanendId(cin),getRemoteChanendId(cin));
+	//printf("Chanend cout: %08x <-> %08x\n",getLocalChanendId(cout),getRemoteChanendId(cout));
+	//return;
+	if (cid % 19 == 0)
 	{
 		cout <: b;
 	}
@@ -157,7 +157,7 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 		}
 		leds1 <: b;
 		t :> tv;
-		t when timerafter(tv + 0x00200000) :> void;
+		t when timerafter(tv + 0x00400000) :> void;
 		leds1 <: 0;
 		cout <: b;
 	}
@@ -167,8 +167,8 @@ void commSpeed(chanend c, unsigned role)
 {
 	unsigned tv1, tv2, tt, i = 0, tests=32, val;
 	timer t;
-	printf("Chanend c: %08x <-> %08x\n",getLocalChanendId(c),getRemoteChanendId(c));
-	return;
+	//printf("Chanend c: %08x <-> %08x\n",getLocalChanendId(c),getRemoteChanendId(c));
+	//return;
 	while(1)
 	{
 		if (!role)
