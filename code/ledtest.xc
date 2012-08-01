@@ -31,28 +31,32 @@ void doled(void)
 	return;
 }
 
-void switchChat(unsigned i, unsigned max)
+void switchChat(unsigned width, unsigned ncores)
 {
-	unsigned start = i,tv,x;//,cid = get_core_id();
+  unsigned cid = get_core_id(), tv;
+	int start = (cid - (width/2)) % ncores, max = (cid + (width/2) - 1) % ncores, i;
 	while(1)
 	{
-		for (i = start; i < max; i++)
+		for (i = start; i != max; i = (i + 1) % ncores)
 		{
 			read_sswitch_reg(i,0x5,tv);
-			if (tv != i)
-			{
-				//printf("%d: BAD node ID %x detected at %x\n",cid,tv,i);
-			}
-			x += tv;
-			//printf("%d: Switch %d says %d\n",cid,i,tv);
-			//printf("HI\n");
-		}
-		if (x > 0x1f0*20)
-		{
-			//printf("%d:	Had a chat with all %d switches (%x)\n",cid,i,x);
-			x = 0;
-		}
+	  }
 	}
+}
+
+void checkLinks()
+{
+  int i = 0x82;
+  unsigned tv, myid = get_core_id();
+  while(1)
+  {
+    read_sswitch_reg(myid,i,tv);
+    if (tv & 0x00800000)
+    {
+      printf("Link error on %d[%x]\n",myid,i);
+    }
+    i = (i == 0x87) ? i + 1 : 0x82;
+  }
 }
 
 void latencyTest(unsigned len)

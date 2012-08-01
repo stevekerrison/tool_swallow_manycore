@@ -17,7 +17,9 @@
 
 void doled(void);
 
-void switchChat(unsigned i, unsigned max);
+void switchChat(unsigned width, unsigned ncores);
+
+void checkLinks();
 
 void testComms(chanend c, unsigned role);
 

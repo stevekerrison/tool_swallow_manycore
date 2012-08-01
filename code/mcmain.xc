@@ -16,7 +16,7 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 112
+#define NCORES 64
 
 int main(void)
 {
@@ -60,12 +60,18 @@ int main(void)
 	}
 	
 	//Generate traffic between switches. This loads up the network a lot.
-	//Ideally nothing should crash. At the moment it causes ET_ILLEGAL_RESOURCE
-	//sometimes. Obvious TODO: FIXME!
   par (int i = 0; i < NCORES; i += 1)
 	{
-	  on stdcore[i]: switchChat(0,NCORES);
+	  on stdcore[i]: switchChat(16,NCORES);
+	  on stdcore[i]: checkLinks();
 	}
+	
+	//Generate traffic between switches. This loads up the network a lot.
+	//Ideally nothing should crash or deadlock.
+  /*par (int i = 0; i < NCORES; i += 1)
+	{
+	  on stdcore[i]: switchChat(0,NCORES);
+	}*/
 	/*
 	//Next three par{}s: Circular LED racetrack (TODO: Generalise for NCORES != 80)
 	par (int i = 7; i < NCORES-4; i += 4)

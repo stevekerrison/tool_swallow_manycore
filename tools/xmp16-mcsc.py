@@ -47,7 +47,7 @@ xc = m.group(0)
 
 coreToJtag = {}
 
-zeroLeft = [0x87,0x85,0x86,0x84,0x82,0x83]
+zeroLeft = [0x87,0x85,0x86,0x84,0x83,0x82]
 zeroRight = [0x87,0x85,0x86,0x84,0x82,0x83]
 oneEven = [0x84,0x86,0x85,0x87,0x82,0x83]
 oneOdd = [0x84,0x86,0x85,0x87,0x82,0x83]
@@ -133,7 +133,7 @@ void __initLinks()
 {
 	unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
 	unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
-	unsigned waittime = 5000000;
+	unsigned waittime = 50000000;
 	timer t;
 	unsigned links[""" + str(len(stw)) + """] = {"""
 	for x in stw:
@@ -181,17 +181,29 @@ void __initLinks()
 		{
 			write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
 			tv = 0;
+			c = 0;
 			while((tv & 0x0e000000) != 0x06000000)
 			{
 				read_sswitch_reg(myid,links[i],tv);
+				/*if (tv & 0x08000000)
+				{
+				  printf("Link error on %d[%x]\\n",myid,links[i]);
+				  write_sswitch_reg_clean(myid,links[i],linksetting | 0x01800000);
+				}*/
 			}
 		}
 		else
 		{
 			tv = 0;
+			c = 0;
 			while((tv & 0x0e000000) != 0x04000000)
 			{
 				read_sswitch_reg(myid,links[i],tv);
+				/*if (tv & 0x08000000)
+				{
+				  printf("Link error on %d[%x]\\n",myid,links[i]);
+				  write_sswitch_reg_clean(myid,links[i],linksetting | 0x00800000);
+				}*/
 			}
 			write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
 			tv = 0;
@@ -207,7 +219,7 @@ void __initLinks()
 	  c = 1;
 	  while (c < """+str(len(coreToJtag))+""")
 	  {
-	    //printf("Got %x\\n",c);
+	    //printf("Poking %x\\n",c);
 	    write_sswitch_reg_clean(c,0x3,1);
 	    while (tv != c)
 	    {
@@ -220,10 +232,12 @@ void __initLinks()
 	else
 	{
 	  tv = 0;
+	  //printf("Core %d waiting\\n",myid);
 	  while (tv != 1)
 	  {
 	    read_sswitch_reg(myid,0x3,tv);
 	  }
+	  //printf("Core %x poked\\n",myid);
 	  write_sswitch_reg_clean(0,0x3,myid);
 	  tv = 0;
 	  while(tv < """+str(len(coreToJtag))+""")
