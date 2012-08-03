@@ -16,7 +16,7 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 64
+#define NCORES 96
 
 int main(void)
 {
@@ -60,17 +60,17 @@ int main(void)
 	}
 	
 	//Generate traffic between switches. This loads up the network a lot.
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
 	{
-	  on stdcore[i]: switchChat(16,NCORES);
-	  on stdcore[i]: checkLinks();
-	}
+	  on stdcore[i]: switchChat(NCORES,NCORES);
+	  //on stdcore[i]: checkLinks();
+	}*/
 	
 	//Generate traffic between switches. This loads up the network a lot.
 	//Ideally nothing should crash or deadlock.
   /*par (int i = 0; i < NCORES; i += 1)
 	{
-	  on stdcore[i]: switchChat(0,NCORES);
+	  on stdcore[i]: switchChat(4,NCORES);
 	}*/
 	/*
 	//Next three par{}s: Circular LED racetrack (TODO: Generalise for NCORES != 80)
