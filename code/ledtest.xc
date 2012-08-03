@@ -39,7 +39,7 @@ void switchChat(unsigned width, unsigned ncores)
 	{
 		for (i = start; i != max; i = (i + 1) % ncores)
 		{
-			read_sswitch_reg(i,0x5,tv);
+			read_sswitch_reg(coreMap[i],0x5,tv);
 	  }
 	}
 }
@@ -66,14 +66,14 @@ void latencyTest(unsigned len)
 	for (i = 0; i < len; i += 2)
 	{
 		t :> tv1;
-		read_sswitch_reg(i,0x5,tmp);
+		read_sswitch_reg(coreMap[i],0x5,tmp);
 		t :> tv2;
 		res[i] = tv2-tv1;
 	}
 	for (i = 1; i < len; i += 2)
 	{
 		t :> tv1;
-		read_sswitch_reg(i,0x5,tmp);
+		read_sswitch_reg(coreMap[i],0x5,tmp);
 		t :> tv2;
 		res[i] = tv2-tv1;
 	}

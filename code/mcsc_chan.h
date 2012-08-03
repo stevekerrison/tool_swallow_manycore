@@ -56,6 +56,8 @@
 #define streamInWord(c,w)	asm("in %0,res[%1]":"=r"(w):"r"(c));
 #define closeInStream(c)	asm("chkct res[%0],1\n" \
 	"outct res[%0],1" :: "r"(c));
+	
+extern int coreMap[];
 
 unsigned getChanend(unsigned dst);
 unsigned getLocalAnonChanend();

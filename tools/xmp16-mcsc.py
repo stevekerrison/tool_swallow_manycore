@@ -201,11 +201,10 @@ void __initLinks()
       while((tv & 0x0e000000) != 0x06000000)
       {
         read_sswitch_reg(myid,links[i],tv);
-        /*if (tv & 0x08000000)
+        if (tv & 0x08000000)
         {
-          printf("Link error on %d[%x]\\n",myid,links[i]);
-          write_sswitch_reg_clean(myid,links[i],linksetting | 0x01800000);
-        }*/
+          asm("ecallt %0"::"r"(tv));
+        }
       }
     }
     else
@@ -229,38 +228,43 @@ void __initLinks()
       }
     }
   }
-  ledOut(7);
-  if (myid == 0)
+  ledOut(7);"""
+  if core > 0:
+    ret += """
+  tv = 0;
+  //printf("Core %d(%d) waiting\\n",myid,"""+str(coreMap.index(core))+""");
+  while (tv != 1)
   {
-    c = 1;
-    while (c < """+str(len(coreToJtag))+""")
-    {
-      //printf("Poking %x\\n",c);
-      write_sswitch_reg_clean(c,0x3,1);
-      while (tv != c)
-      {
-        read_sswitch_reg(0,0x3,tv);
-      }
-      c++;
-    }
-    write_sswitch_reg_clean(0,0x3,c);
+    read_sswitch_reg(myid,0x3,tv);
   }
-  else
+  //printf("Core %d(%d) poked\\n",myid,"""+str(coreMap.index(core))+""");
+  write_sswitch_reg_clean(0,0x3,1);
+  tv = 0;
+  while(tv < """ + str(coreMap[-1]+1) + """)
   {
+    read_sswitch_reg(0,0x3,tv);
+    t :> tv;
+    t when timerafter(tv + waittime) :> void;
+  }
+  """
+  else:
+    ret += """
+  c = 1;
+  while (c < """+str(len(coreToJtag))+""")
+  {
+    printf("Poking %d(%d)\\n",coreMap[c],c);
+    write_sswitch_reg_clean(coreMap[c],0x3,1);
+    printf("Sent poke!\\n");
     tv = 0;
-    //printf("Core %d waiting\\n",myid);
     while (tv != 1)
-    {
-      read_sswitch_reg(myid,0x3,tv);
-    }
-    //printf("Core %x poked\\n",myid);
-    write_sswitch_reg_clean(0,0x3,myid);
-    tv = 0;
-    while(tv < """+str(len(coreToJtag))+""")
     {
       read_sswitch_reg(0,0x3,tv);
     }
+    write_sswitch_reg_clean(0,0x3,0);
+    c++;
   }
+  write_sswitch_reg_clean(0,0x3,""" + str(coreMap[-1]+1) + """);"""
+  ret += """
   ledOut(6);
   
   t :> tv;
@@ -403,7 +407,7 @@ for x in channelMappings:
 for x in chans:
   for y in sorted(chans[x]):
     inits[x] += """
-  if (!getChanend(""" + hex(chans[x][y]) + ")) printf(\"FAIL for dst %08x\\n\"," + hex(chans[x][y]) + ");"
+  if (!getChanend(""" + hex(chans[x][y]) + "))"
 
 
 for x in mains:
@@ -435,6 +439,7 @@ print "Now building..."
 
 cmd = shlex.split("scmake.py " + outdir + " " + str(len(coreToJtag)));
 cmd.extend(additional_args)
+cmd.extend(["-DCOREMAP=" + ','.join(map(str,coreMap)) + "," + str(len(coreToJtag))])
 subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
 
 print "Done building!"

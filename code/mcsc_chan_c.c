@@ -16,6 +16,8 @@
 #include <xccompat.h>
 #include "mcsc_chan.h"
 
+int coreMap[] = {COREMAP};
+
 /* Something weird happens with channel allocation here */
 unsigned write_sswitch_reg_no_ack_clean(unsigned node, unsigned reg, unsigned val)
 {
