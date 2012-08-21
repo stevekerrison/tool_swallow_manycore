@@ -155,7 +155,6 @@ void __initLinks()
   for x in stw:
     ret += hex(x) + ","
   ret += """};
-  ledOut(1);
   /* Make sure scratch register is clear */
   write_sswitch_reg_no_ack_clean(0,0x3,0);
   /* Set my core ID */
@@ -165,16 +164,11 @@ void __initLinks()
   {
     write_sswitch_reg_clean(myid,i,0);
   }
-  /* Enable all links */
-  for (i = 0; i < nlinks; i += 1)
+  /* Enable local links on the chip, between cores */
+  for (i = 0x84; i < 0x88; i += 1)
   {
-    write_sswitch_reg_clean(myid,links[i],linksetting);
+    write_sswitch_reg_clean(myid,i,linksetting);
   }
-  /* Give all other nodes a chance to activate their X-Links before we start
-    splatting tokens around */
-  t :> tv;
-  t when timerafter(tv + waittime) :> void;
-  ledOut(3);
 """
     
   debug = False
@@ -190,8 +184,10 @@ void __initLinks()
       ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
   
   ret += """
-  /* Issue hello and wait for credit on active links */
-  for (i = 0; i < nlinks; i += 1)
+  /* Give neighbouring core a chance to wake up */
+  t :> tv;
+  t when timerafter(tv + waittime) :> void;
+  for (i = 0; i < 4; i += 1)
   {
     if (links[i] & 1)
     {
@@ -214,6 +210,77 @@ void __initLinks()
       while((tv & 0x0e000000) != 0x04000000)
       {
         read_sswitch_reg(myid,links[i],tv);
+        if (tv & 0x08000000)
+        {
+          asm("ecallt %0"::"r"(tv));
+        }
+      }
+      write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+      tv = 0;
+      while((tv & 0x0e000000) != 0x06000000)
+      {
+        read_sswitch_reg(myid,links[i],tv);
+      }
+    }
+  }
+  ledOut(1);
+  if (myid & 1)
+  {
+    read_sswitch_reg(myid-1,XS1_L_SSWITCH_NODE_ID_NUM,tv);
+    if (tv != myid-1)
+    {
+      //Uh-oh!
+      asm("ecallt %0"::"r"(1));
+    }
+  }
+  else
+  {
+    read_sswitch_reg(myid+1,XS1_L_SSWITCH_NODE_ID_NUM,tv);
+    if (tv != myid+1)
+    {
+      //Uh-oh!
+      asm("ecallt %0"::"r"(1));
+    }
+  }
+  ledOut(3);
+  /* Enable all other links */
+  for (i = 4; i < nlinks; i += 1)
+  {
+    write_sswitch_reg_clean(myid,links[i],linksetting);
+  }
+  /* Give all other nodes a chance to activate their X-Links before we start
+    splatting tokens around */
+  t :> tv;
+  t when timerafter(tv + waittime) :> void;
+  ledOut(7);
+  /* Issue hello and wait for credit on active links */
+  for (i = 4; i < nlinks; i += 1)
+  {
+    if (links[i] & 1)
+    {
+      write_sswitch_reg_clean(myid,links[i],linksetting | 0x01000000);
+      tv = 0;
+      c = 0;
+      while((tv & 0x0e000000) != 0x06000000)
+      {
+        read_sswitch_reg(myid,links[i],tv);
+        if (tv & 0x08000000)
+        {
+          asm("ecallt %0"::"r"(tv));
+        }
+      }
+    }
+    else
+    {
+      tv = 0;
+      c = 0;
+      while((tv & 0x0e000000) != 0x04000000)
+      {
+        read_sswitch_reg(myid,links[i],tv);
+        if (tv & 0x08000000)
+        {
+          asm("ecallt %0"::"r"(tv));
+        }
         /*if (tv & 0x08000000)
         {
           printf("Link error on %d[%x]\\n",myid,links[i]);
@@ -228,53 +295,69 @@ void __initLinks()
       }
     }
   }
-  ledOut(7);"""
-  if core > 0:
-    ret += """
-  tv = 0;
-  //printf("Core %d(%d) waiting\\n",myid,"""+str(coreMap.index(core))+""");
-  while (tv != 1)
+  ledOut(0xf);
+  if (myid == 0)
   {
-    read_sswitch_reg(myid,0x3,tv);
-  }
-  //printf("Core %d(%d) poked\\n",myid,"""+str(coreMap.index(core))+""");
-  write_sswitch_reg_clean(0,0x3,1);
-  tv = 0;
-  while(tv < """ + str(coreMap[-1]+1) + """)
-  {
-    read_sswitch_reg(0,0x3,tv);
-    t :> tv;
-    t when timerafter(tv + waittime) :> void;
-  }
-  """
-  else:
-    ret += """
-  c = 1;
-  while (c < """+str(len(coreToJtag))+""")
-  {
-    printf("Poking %d(%d)\\n",coreMap[c],c);
-    write_sswitch_reg_clean(coreMap[c],0x3,1);
-    printf("Sent poke!\\n");
-    tv = 0;
-    while (tv != 1)
+    for (tv = 1; tv < """ + str(len(coreToJtag)) + """; tv += 1)
     {
-      read_sswitch_reg(0,0x3,tv);
+      write_sswitch_reg_clean(tv,0x3,tv);
     }
-    write_sswitch_reg_clean(0,0x3,0);
-    c++;
   }
-  write_sswitch_reg_clean(0,0x3,""" + str(coreMap[-1]+1) + """);"""
-  ret += """
-  ledOut(6);
-  
+  else
+  {
+    tv = 0;
+    while (tv != myid)
+    {
+      read_sswitch_reg(myid,0x3,tv);
+    }
+  }
+  ledOut(0xe);
+  if (myid == """ + str(len(coreToJtag)-1) + """)
+  {
+    for (tv = 0; tv < """ + str(len(coreToJtag)-1) + """; tv += 1)
+    {
+      write_sswitch_reg_clean(tv,0x3,tv);
+    }
+  }
+  else
+  {
+    tv = 0;
+    while (tv != myid)
+    {
+      read_sswitch_reg(myid,0x3,tv);
+    }
+  }
+  ledOut(0xc);
   t :> tv;
   t when timerafter(tv + waittime) :> void;
+  /*tv = 1;
+  i = 15;
+  if (myid == tv)
+  {
+    c = getChanend((i << 16) | 0x0002);
+    printf("Chanend %08x\\n",c);
+    closeChanend(c);
+    freeChanend(c);
+    printf("Core %d cleared\\n",myid);
+  }
+  else if (myid == i)
+  {
+    c = getChanend((tv << 16) | 0x0002);
+    printf("Chanend %08x\\n",c);
+    closeChanend(c);
+    freeChanend(c);
+    printf("Core %d cleared\\n",myid);
+  }*/
   /* Now grab a channel on the other side of the board to test things out */
-  c = getChanend(("""+str((core+(len(coreToJtag)/2))%len(coreToJtag))+"""<<16) | 0x0002);
-  t :> tv;
-  t when timerafter(tv + waittime) :> void;
-  closeChanend(c);
-  freeChanend(c);
+  if (myid < 4)
+  {
+    c = getChanend(("""+str((core+1)%4)+"""<<16) | 0x0002);
+    //printf("Core %d got %08x\\n",myid,c);
+    closeChanend(c);
+    freeChanend(c);
+    //printf("Core %d released %08x\\n",myid,c);
+  }
+  
   
   /* Now we declare any channels we need */
 """
@@ -282,7 +365,7 @@ void __initLinks()
 
 def endInitLinks(core):
   return """
-  ledOut(0xf);
+  ledOut(0x8);
   t :> tv;
   t when timerafter(tv + waittime) :> void;
   ledOut(0x0);

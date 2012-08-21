@@ -16,7 +16,7 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 96
+#define NCORES 16
 
 int main(void)
 {
@@ -44,20 +44,20 @@ int main(void)
   }*/
   
   //Fill each core's pipeline with some CPU-burning code
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
-  }
+  }*/
   
   //Splat some values out of the LEDs with a token passed around
-  par (int i = 0; i < (NCORES>>1); i += 2)
+  /*par (int i = 0; i < (NCORES>>1); i += 2)
   {
     on stdcore[(i>>1)*4]: racetrack(c[i],c[i+1],(i>>1)*4);
     on stdcore[((i>>1)*4)+3]: racetrack(c[i+1],c[(i+2)%(NCORES>>1)],((i>>1)*4)+3);
-  }
+  }*/
   
   //Generate traffic between switches. This loads up the network a lot.
   /*par (int i = 0; i < NCORES; i += 1)
