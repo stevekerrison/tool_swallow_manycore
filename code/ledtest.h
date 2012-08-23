@@ -15,7 +15,7 @@
 
 #include "mcsc_chan.h"
 
-void scopetest(void);
+void scopetest(unsigned cid);
 
 void doled(void);
 

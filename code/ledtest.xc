@@ -14,22 +14,21 @@
 #include <stdio.h>
 #include "mcsc_chan.h"
 #include <xscope.h>
-#include <print.h>
 
 out port leds1 = XS1_PORT_4F;
 
-void scopetest()
+void scopetest(unsigned cid)
 {
-  //timer t;
-  //unsigned tv;
+  timer t;
+  unsigned tv;
   xscope_register(0);
   xscope_config_io(XSCOPE_IO_BASIC);
-  //t :> tv;
+  t :> tv;
   while(1) 
   {
-    printstrln("Hello");
-    //tv += 0x00040000;
-    //t when timerafter(tv) :> void;
+    printf("Hello from core %u!\n",cid);
+    tv += 0x00000000;
+    t when timerafter(tv) :> tv;
   }
 }
 

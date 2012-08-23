@@ -240,7 +240,7 @@ for y in range(yboards):
         if k == 7:
           dirregspos += 1
       #Poke in some XSCOPE stuff!!
-      row = min(2,c/(xboardnodes*xboards))
+      row = min(2,c/xboardnodes + yboardnodes*y)
       dirregs[1] |= dirmap[scopemap[row][c &0x3]] << 28
       for k,d in enumerate(dirregs):
         print hex(dirreg+k),"=",hex(d)
