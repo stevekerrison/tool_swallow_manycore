@@ -22,6 +22,11 @@ int main(void)
 {
 
   chan c[NCORES];
+  
+  par
+  {
+    on stdcore[15]: scopetest();
+  }
   //Do some RTT testing between cores 15 *logical* nodes apart
   /*par (int i = 0; i < NCORES; i += 1)
   {
@@ -53,17 +58,32 @@ int main(void)
   }*/
   
   //Splat some values out of the LEDs with a token passed around
-  /*par (int i = 0; i < (NCORES>>1); i += 2)
+  par (int i = 0; i < (NCORES>>1); i += 2)
   {
     on stdcore[(i>>1)*4]: racetrack(c[i],c[i+1],(i>>1)*4);
     on stdcore[((i>>1)*4)+3]: racetrack(c[i+1],c[(i+2)%(NCORES>>1)],((i>>1)*4)+3);
+  }
+  /*par {
+    on stdcore[47] : testa(c[0]);
+    on stdcore[48] : testb(c[0]);
+  }*/
+  
+  /*par (int i = 0; i < 4; i += 4)
+  {
+    on stdcore[0]:  racetrack(c[0],c[1],0);
+    on stdcore[3]:  racetrack(c[1],c[2],3);
+    on stdcore[4]:  racetrack(c[2],c[3],4);
+    on stdcore[7]:  racetrack(c[3],c[4],7);
+    on stdcore[8]:  racetrack(c[4],c[5],8);
+    on stdcore[11]: racetrack(c[5],c[6],11);
+    on stdcore[12]: racetrack(c[6],c[7],12);
+    on stdcore[15]: racetrack(c[7],c[0],15);
   }*/
   
   //Generate traffic between switches. This loads up the network a lot.
   /*par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: switchChat(NCORES,NCORES);
-    //on stdcore[i]: checkLinks();
   }*/
   
   //Generate traffic between switches. This loads up the network a lot.

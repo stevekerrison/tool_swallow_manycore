@@ -101,16 +101,19 @@ def parseBoardConfig(bc):
   coreMap = range(len(coreToJtag))
   #If we have a 3D system and will generate Node ID holes vertically, we need to do more work on the map!
   if dims and dims[0][0] > 1 and dims[1][0] > 1 and math.log(dims[0][0])/math.log(2.0) != float(dims[0][1]):
-    modpoint = 16 * dims[0][0]
+    modpoint = 16 * dims[1][0]
     offset = 0
-    stepover = ((2**dims[0][1])-(dims[0][0])) * 16
+    stepover = ((2**dims[1][1])-(dims[1][0])) * 16
     for i in range(len(coreToJtag)):
       coreMap[i] = offset
       if i > 0 and (i+1) % modpoint == 0:
         offset += stepover+1
       else:
         offset += 1
-    print coreMap[48]
+  coreMap = [c for d in [b[0:2]+[b[3]]+[b[2]] for b in [list(a) for a in zip(*[iter(coreMap)]*4)]] for c in d] 
+    #print dims
+    #print coreMap
+    #sys.exit(0)
   return cfg
 
 bc = parseBoardConfig(open(sys.argv[2],"r").read())
@@ -127,6 +130,7 @@ int main(void)
 def endMain(core):
   return """
   }
+  asm("freet"::);
   return 0;
 }"""
 
@@ -149,7 +153,7 @@ void __initLinks()
 {
   unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
   unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
-  unsigned waittime = 50000000;
+  unsigned waittime = 5000000;
   timer t;
   unsigned links[""" + str(len(stw)) + """] = {"""
   for x in stw:
@@ -182,6 +186,13 @@ void __initLinks()
     ret += wrstr % (r,bc[j][r])
     if debug:
       ret += debugstr % ("Written","to",hex(bc[j][r]),hex(r))
+  if j == 0:
+    ret += """
+  /* XSCOPE */
+  read_sswitch_reg(myid,0xd,tv);
+  write_sswitch_reg_no_ack_clean(myid,0x0d,tv | 0xf0000000);
+  write_sswitch_reg_clean(myid,0x22,0xf00);
+  write_sswitch_reg_clean(myid,0x82,0x81000800);"""
   
   ret += """
   /* Give neighbouring core a chance to wake up */
@@ -295,70 +306,41 @@ void __initLinks()
       }
     }
   }
-  ledOut(0xf);
-  if (myid == 0)
+  ledOut(0xf);"""
+  if (core == 0):
+    ret += """
+  for (i = 1; i < """ + str(len(coreToJtag)) + """; i += 1)
   {
-    for (tv = 1; tv < """ + str(len(coreToJtag)) + """; tv += 1)
-    {
-      write_sswitch_reg_clean(tv,0x3,tv);
-    }
-  }
-  else
-  {
+    write_sswitch_reg_clean(i,0x3,1);
     tv = 0;
-    while (tv != myid)
+    while (tv != i)
     {
-      read_sswitch_reg(myid,0x3,tv);
+      read_sswitch_reg(0,0x3,tv);
     }
   }
   ledOut(0xe);
-  if (myid == """ + str(len(coreToJtag)-1) + """)
+  write_sswitch_reg_clean(0,0x3,""" + str(len(coreToJtag)) + """);
+    """
+  else:
+    ret += """
+  tv = 0;
+  while(tv != 1)
   {
-    for (tv = 0; tv < """ + str(len(coreToJtag)-1) + """; tv += 1)
-    {
-      write_sswitch_reg_clean(tv,0x3,tv);
-    }
+    read_sswitch_reg(myid,0x3,tv);
   }
-  else
+  write_sswitch_reg_clean(0,0x3,myid);
+  ledOut(0xe);
+  while(tv != """ + str(len(coreToJtag)) + """)
   {
-    tv = 0;
-    while (tv != myid)
-    {
-      read_sswitch_reg(myid,0x3,tv);
-    }
+    read_sswitch_reg(0,0x3,tv);
   }
+    """
+  ret += """
   ledOut(0xc);
   t :> tv;
   t when timerafter(tv + waittime) :> void;
-  /*tv = 1;
-  i = 15;
-  if (myid == tv)
-  {
-    c = getChanend((i << 16) | 0x0002);
-    printf("Chanend %08x\\n",c);
-    closeChanend(c);
-    freeChanend(c);
-    printf("Core %d cleared\\n",myid);
-  }
-  else if (myid == i)
-  {
-    c = getChanend((tv << 16) | 0x0002);
-    printf("Chanend %08x\\n",c);
-    closeChanend(c);
-    freeChanend(c);
-    printf("Core %d cleared\\n",myid);
-  }*/
-  /* Now grab a channel on the other side of the board to test things out */
-  if (myid < 4)
-  {
-    c = getChanend(("""+str((core+1)%4)+"""<<16) | 0x0002);
-    //printf("Core %d got %08x\\n",myid,c);
-    closeChanend(c);
-    freeChanend(c);
-    //printf("Core %d released %08x\\n",myid,c);
-  }
-  
-  
+"""
+  ret += """  
   /* Now we declare any channels we need */
 """
   return ret
@@ -490,7 +472,12 @@ for x in channelMappings:
 for x in chans:
   for y in sorted(chans[x]):
     inits[x] += """
-  if (!getChanend(""" + hex(chans[x][y]) + "))"
+  c = getChanend(""" + hex(chans[x][y]) + """);
+  asm(\"ecallf %0\"::\"r\"(c));
+  //t :> tv;
+  //t when timerafter(tv + waittime) :> void;
+  //printf("%02x: %08x\\n",myid,getRemoteChanendId(c));
+  //asm("outct res[%0],2"::"r"(c));"""
 
 
 for x in mains:

@@ -52,7 +52,7 @@ else:
 extraargs = sys.argv[3:]
 
 def compileXc(c):
-	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc mcsc_chan.S mcsc_chan_c.c XMP16-unicore.xn"
+	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc mcsc_chan.S mcsc_chan_c.c XMP16-unicore.xn -lxscope"
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
 	subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()
@@ -65,7 +65,7 @@ r = pool.map_async(compileXc, tasks)
 r.wait() # Wait on the results
 
 for c in range(ilim):
-	sec = subprocess.Popen(shlex.split("xesection scmain_" + str(c) + ".xe 1"), stdout=subprocess.PIPE).communicate()[0]
+	sec = subprocess.Popen(shlex.split("xesection scmain_" + str(c) + ".xe 3"), stdout=subprocess.PIPE).communicate()[0]
 	f = open(str(c) + ".sec","w")
 	build += " " + str(c) + ".sec"
 	f.write(sec)

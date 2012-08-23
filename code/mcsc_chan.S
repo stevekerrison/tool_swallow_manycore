@@ -54,11 +54,12 @@ getLocalChanendId:
 .align 4
 outUint:
 	//bl closeChanend
-	outct res[r0],1
-	chkct res[r0],1
+//	outct res[r0],1
+//	chkct res[r0],1
 	out res[r0],r1
-	outct res[r0],1
-	chkct res[r0],1
+	outct res[r0],2
+//	outct res[r0],1
+//	chkct res[r0],1
 	retsp 0x0
 .cc_bottom outUint.elim
 
@@ -69,11 +70,12 @@ outUint:
 .align 4
 outByte:
 	//bl closeChanend
-	outct res[r0],1
-	chkct res[r0],1
+//	outct res[r0],1
+//	chkct res[r0],1
 	outt res[r0],r1
-	outct res[r0],1
-	chkct res[r0],1
+	outct res[r0],2
+//	outct res[r0],1
+//	chkct res[r0],1
 	retsp 0x0
 .cc_bottom outByte.elim
 
@@ -83,11 +85,11 @@ outByte:
 .linkset inUint.nstackwords, 0
 .align 4
 inUint:
-	chkct res[r0],1
-	outct res[r0],1
+//	chkct res[r0],1
+//	outct res[r0],1
 	in r1,res[r0]
-	chkct res[r0],1
-	outct res[r0],1
+//	chkct res[r0],1
+//	outct res[r0],1
 	mov r0,r1
 	retsp 0x0
 .cc_bottom inUint.elim
@@ -98,11 +100,11 @@ inUint:
 .linkset inByte.nstackwords, 0
 .align 4
 inByte:
-	chkct res[r0],1
-	outct res[r0],1
+//	chkct res[r0],1
+//	outct res[r0],1
 	int r1,res[r0]
-	chkct res[r0],1
-	outct res[r0],1
+//	chkct res[r0],1
+//	outct res[r0],1
 	mov r0,r1
 	retsp 0x0
 .cc_bottom inByte.elim

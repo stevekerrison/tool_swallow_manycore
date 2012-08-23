@@ -13,8 +13,25 @@
 #include <platform.h>
 #include <stdio.h>
 #include "mcsc_chan.h"
+#include <xscope.h>
+#include <print.h>
 
 out port leds1 = XS1_PORT_4F;
+
+void scopetest()
+{
+  //timer t;
+  //unsigned tv;
+  xscope_register(0);
+  xscope_config_io(XSCOPE_IO_BASIC);
+  //t :> tv;
+  while(1) 
+  {
+    printstrln("Hello");
+    //tv += 0x00040000;
+    //t when timerafter(tv) :> void;
+  }
+}
 
 void doled(void)
 {
@@ -147,7 +164,7 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 	//printf("Chanend cin: %08x <-> %08x\n",getLocalChanendId(cin),getRemoteChanendId(cin));
 	//printf("Chanend cout: %08x <-> %08x\n",getLocalChanendId(cout),getRemoteChanendId(cout));
 	//return;
-	if (cid % 19 == 0)
+	if (cid/* % 19*/ == 0)
 	{
 		cout <: b;
 	}
@@ -162,8 +179,9 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 		leds1 <: b;
 		t :> tv;
 		t when timerafter(tv + 0x00400000) :> void;
-		leds1 <: 0;
 		cout <: b;
+		leds1 <: 0;
+		//printf("Core %d done!\n",coreMap[cid]);
 	}
 }
 

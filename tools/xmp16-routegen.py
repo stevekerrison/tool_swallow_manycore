@@ -77,6 +77,13 @@ dirreg = 0x0c
 lmap = [['towards','away'],['towards','away']]
 xmap = [['towards','towards'],['right','left']]
 ymap = [['down','up'],['away','away']]
+
+#Xscopemap applied differently to the regular routing maps: row0, row1, row(>1)
+scopemap = [\
+  ['down','away','away','down'],\
+  ['towards','left','left','towards'],\
+  ['up','away','away','up']\
+]
 #xmap = [['right','left'],['right','left'],['right','left'],['right','left']]
 #ymap = [['down','up'],['left','left'],['right','right'],['down','up']]
 #zmap = [['right','right'],['right','towards'],['away','left'],['left','left']]
@@ -232,6 +239,9 @@ for y in range(yboards):
         dirregs[dirregspos] |= directions[k]<<(k*dirwidth)
         if k == 7:
           dirregspos += 1
+      #Poke in some XSCOPE stuff!!
+      row = min(2,c/(xboardnodes*xboards))
+      dirregs[1] |= dirmap[scopemap[row][c &0x3]] << 28
       for k,d in enumerate(dirregs):
         print hex(dirreg+k),"=",hex(d)
       # Now throw away any links that are unconnected

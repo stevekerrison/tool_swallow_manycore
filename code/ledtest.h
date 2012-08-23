@@ -15,6 +15,8 @@
 
 #include "mcsc_chan.h"
 
+void scopetest(void);
+
 void doled(void);
 
 void switchChat(unsigned width, unsigned ncores);
