@@ -14,8 +14,24 @@
 #include <stdio.h>
 #include "mcsc_chan.h"
 #include <xscope.h>
+#include <print.h>
 
 out port leds1 = XS1_PORT_4F;
+
+void bwah(chanend c, unsigned cid)
+{
+  if (cid == 0)
+  {
+    c <: 1;
+  }
+  else
+  {
+    xscope_register(0);
+    xscope_config_io(XSCOPE_IO_BASIC);
+    c :> cid;
+    printstrln("HI!");
+  }
+}
 
 void scopetest(unsigned cid)
 {
@@ -27,8 +43,26 @@ void scopetest(unsigned cid)
   while(1) 
   {
     printf("Hello from core %u!\n",cid);
-    tv += 0x00000000;
+    tv += 0x08000000;
     t when timerafter(tv) :> tv;
+  }
+}
+
+void tokenscope(chanend ci, chanend co, unsigned cid)
+{
+  unsigned t;
+  xscope_register(0);
+  xscope_config_io(XSCOPE_IO_BASIC);
+  if (cid == 0)
+  {
+    printintln(cid);
+    co <: 1;
+  }
+  while (1)
+  {
+    ci :> t;
+    printintln(cid);
+    co <: t;
   }
 }
 

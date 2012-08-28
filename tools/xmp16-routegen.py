@@ -25,7 +25,7 @@ If "M" is specified as an additional argument, an L1 memory board is added to
 the right of the top row of boards.
 
 Example for a 2x2 mesh of boards: ./xmp16-routegen.py "1 1; 1 1"
-Example for a 2x3 mesh of boards: ./xmp16-routegen.py "1 1 1;1 1 1" M
+Example for a 2x3 mesh of boards with memory: ./xmp16-routegen.py "1 1 1;1 1 1" M
 """
 import sys,math
 
@@ -57,7 +57,7 @@ dirmap = {                  \
 linkmap = [                               \
   {'a':'up','b':'down','efgh':'towards'}, \
   {'a':'left','b':'right','efgh':'away'}, \
-  {'a':'up','b':'down','efgh':'towards'},  \
+  {'a':'up','b':'down','efgh':'towards'}, \
   {'a':'left','b':'right','efgh':'away'}, \
 ]
 

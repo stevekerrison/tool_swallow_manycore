@@ -17,6 +17,10 @@
 
 void scopetest(unsigned cid);
 
+void tokenscope(chanend ci, chanend co, unsigned cid);
+
+void bwah(chanend c, unsigned cid);
+
 void doled(void);
 
 void switchChat(unsigned width, unsigned ncores);

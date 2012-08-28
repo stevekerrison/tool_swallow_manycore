@@ -16,17 +16,26 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 32
+#define NCORES 96
 
 int main(void)
 {
 
   chan c[NCORES];
   
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: scopetest(i);
-  }
+  }*/
+  /*par (int i = 0; i < NCORES; i += 1)
+  {
+    on stdcore[i]: tokenscope(c[i],c[(i+1)%NCORES],i);
+  }*/
+  /*par
+  {
+    on stdcore[0] : bwah(c[0],9);
+    on stdcore[9] : bwah(c[0],0);
+  }*/
   //Do some RTT testing between cores 15 *logical* nodes apart
   /*par (int i = 0; i < NCORES; i += 1)
   {
@@ -49,13 +58,13 @@ int main(void)
   }*/
   
   //Fill each core's pipeline with some CPU-burning code
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
-  }
+  }*/
   
   //Splat some values out of the LEDs with a token passed around
   par (int i = 0; i < (NCORES>>1); i += 2)

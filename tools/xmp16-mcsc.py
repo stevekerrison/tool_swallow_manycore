@@ -122,7 +122,22 @@ def initMain(core):
   return "\n/* Main for core " + str(core) + """*/
 int main(void)
 {
+  unsigned ctrl_data; //Used by AEC code, maybe
   __initLinks();
+//Enable dynamic AEC if we want AEC enabled even on cores that are in use
+#ifdef AEC_ON_INUSE_CORE
+#if AEC_DIVIDER_""" + str(core) + """ > 1
+  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
+  ctrl_data = getps(XS1_PS_XCORE_CTRL0);
+  ctrl_data |= 0x30;
+  setps(XS1_PS_XCORE_CTRL0, ctrl_data);
+#elif AEC_DIVIDER > 1
+  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
+  ctrl_data = getps(XS1_PS_XCORE_CTRL0);
+  ctrl_data |= 0x30;
+  setps(XS1_PS_XCORE_CTRL0, ctrl_data);
+#endif
+#endif
   par
   {
 """
@@ -130,6 +145,20 @@ int main(void)
 def endMain(core):
   return """
   }
+//Enable dynamic AEC just before we free the final thread, meaning AEC is always active on this unused core
+#ifndef AEC_ON_INUSE_CORE
+#if AEC_DIVIDER_""" + str(core) + """ > 1
+  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
+  ctrl_data = getps(XS1_PS_XCORE_CTRL0);
+  ctrl_data |= 0x30;
+  setps(XS1_PS_XCORE_CTRL0, ctrl_data);
+#elif AEC_DIVIDER > 1
+  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
+  ctrl_data = getps(XS1_PS_XCORE_CTRL0);
+  ctrl_data |= 0x30;
+  setps(XS1_PS_XCORE_CTRL0, ctrl_data);
+#endif
+#endif
   asm("freet"::);
   return 0;
 }"""
@@ -153,7 +182,7 @@ void __initLinks()
 {
   unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
   unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
-  unsigned waittime = 5000000;
+  unsigned waittime = 10000000;
   timer t;
   unsigned links[""" + str(len(stw)) + """] = {"""
   for x in stw:
