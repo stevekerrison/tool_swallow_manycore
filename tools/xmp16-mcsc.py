@@ -100,20 +100,17 @@ def parseBoardConfig(bc):
   #Default is direct mapping, for dimensions that fit perfectly the number of address bits, or are simple 2D
   coreMap = range(len(coreToJtag))
   #If we have a 3D system and will generate Node ID holes vertically, we need to do more work on the map!
-  if dims and dims[0][0] > 1 and dims[1][0] > 1 and math.log(dims[0][0])/math.log(2.0) != float(dims[0][1]):
-    modpoint = 16 * dims[1][0]
+  if dims and dims[1][0] > 1 and math.log(dims[1][0])/math.log(2.0) != float(dims[1][1]):
+    modpoint = 4 * dims[1][0]
     offset = 0
-    stepover = ((2**dims[1][1])-(dims[1][0])) * 16
+    stepover = ((2**dims[1][1])-(dims[1][0])) * 4
     for i in range(len(coreToJtag)):
       coreMap[i] = offset
       if i > 0 and (i+1) % modpoint == 0:
         offset += stepover+1
       else:
         offset += 1
-  coreMap = [c for d in [b[0:2]+[b[3]]+[b[2]] for b in [list(a) for a in zip(*[iter(coreMap)]*4)]] for c in d] 
-    #print dims
-    #print coreMap
-    #sys.exit(0)
+  coreMap = [c for d in [b[0:2]+[b[3]]+[b[2]] for b in [list(a) for a in zip(*[iter(coreMap)]*4)]] for c in d]
   return cfg
 
 bc = parseBoardConfig(open(sys.argv[2],"r").read())
@@ -181,8 +178,8 @@ def initInitLinks(core):
 void __initLinks()
 {
   unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-  unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
-  unsigned waittime = 10000000;
+  unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0001002;
+  unsigned waittime = 20000000;
   timer t;
   unsigned links[""" + str(len(stw)) + """] = {"""
   for x in stw:
@@ -340,15 +337,15 @@ void __initLinks()
     ret += """
   for (i = 1; i < """ + str(len(coreToJtag)) + """; i += 1)
   {
-    write_sswitch_reg_clean(i,0x3,1);
+    write_sswitch_reg_clean(coreMap[i],0x3,1);
     tv = 0;
-    while (tv != i)
+    while (tv != coreMap[i])
     {
       read_sswitch_reg(0,0x3,tv);
     }
   }
   ledOut(0xe);
-  write_sswitch_reg_clean(0,0x3,""" + str(len(coreToJtag)) + """);
+  write_sswitch_reg_clean(0,0x3,""" + str(max(coreMap)) + """);
     """
   else:
     ret += """
@@ -359,7 +356,7 @@ void __initLinks()
   }
   write_sswitch_reg_clean(0,0x3,myid);
   ledOut(0xe);
-  while(tv != """ + str(len(coreToJtag)) + """)
+  while(tv != """ + str(max(coreMap)) + """)
   {
     read_sswitch_reg(0,0x3,tv);
   }
@@ -402,6 +399,9 @@ print "Found %d channels declared" % sum([x[1] for x in chans])
 m = re.findall("par(\s+\([^\{]*\))?\s*\{(.*?)\}",xc,re.M|re.S)
 allocs = ""
 
+#print len(coreMap),coreMap
+#print len(coreToJtag),coreToJtag
+#sys.exit(0)
 
 for x in m:
   replicator = x[0]
