@@ -16,7 +16,7 @@
 //Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
-#define NCORES 96
+#define NCORES 64
 
 int main(void)
 {
@@ -65,6 +65,11 @@ int main(void)
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
   }*/
+  
+  par
+  {
+    on stdcore[38]: dynamic_linkup(38);
+  }
   
   //Splat some values out of the LEDs with a token passed around
   par (int i = 0; i < (NCORES>>1); i += 2)

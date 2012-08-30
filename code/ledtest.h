@@ -15,6 +15,8 @@
 
 #include "mcsc_chan.h"
 
+void dynamic_linkup(unsigned vid);
+
 void scopetest(unsigned cid);
 
 void tokenscope(chanend ci, chanend co, unsigned cid);

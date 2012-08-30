@@ -18,6 +18,46 @@
 
 out port leds1 = XS1_PORT_4F;
 
+void dynamic_linkup(unsigned vid)
+{
+  unsigned data, cid = coreMap[vid], tv;
+  timer t;
+  xscope_register(0);
+  xscope_config_io(XSCOPE_IO_BASIC);
+  read_sswitch_reg(cid,0x83,data);
+  printstr("My core VID/RealID is: 0x");
+  printhex(vid);
+  printstr("/0x");
+  printhexln(cid);
+  printstr("The link state is currently: 0x");
+  printhexln(data);
+  write_sswitch_reg_clean(cid,0x83,0x80002004);
+  data = 0;
+  t :> tv;
+  while((data & 0x0e000000) != 0x06000000)
+  {
+    read_sswitch_reg(cid,0x83,data);
+    printstr("The link state is currently: 0x");
+    printhexln(data);
+    if (data & 0x08000000)
+    {
+      write_sswitch_reg(cid,0x83,0x80002004);
+      tv += 0x04000000;
+      t when timerafter(tv) :> void;
+      write_sswitch_reg(cid,0x83,0x80002004);
+      tv += 0x04000000;
+      t when timerafter(tv) :> void;
+      write_sswitch_reg(cid,0x83,0x80802004);
+      tv += 0x04000000;
+      t when timerafter(tv) :> void;
+      write_sswitch_reg(cid,0x83,0x81002004);
+    }
+    tv += 0x04000000;
+    t when timerafter(tv) :> void;
+  }
+  printstrln("Link is now up!");
+}
+
 void bwah(chanend c, unsigned cid)
 {
   if (cid == 0)

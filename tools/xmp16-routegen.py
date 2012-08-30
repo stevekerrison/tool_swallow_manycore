@@ -84,6 +84,11 @@ scopemap = [\
   ['towards','left','left','towards'],\
   ['up','away','away','up']\
 ]
+#Temporary mapping for memory: row0, row(>0)
+memmap = [\
+  ['towards','left','left','towards'],\
+  ['up','away','away','up']\
+]
 #xmap = [['right','left'],['right','left'],['right','left'],['right','left']]
 #ymap = [['down','up'],['left','left'],['right','right'],['down','up']]
 #zmap = [['right','right'],['right','towards'],['away','left'],['left','left']]
@@ -241,7 +246,9 @@ for y in range(yboards):
           dirregspos += 1
       #Poke in some XSCOPE stuff!!
       row = min(2,c/xboardnodes + yboardnodes*y)
-      dirregs[1] |= dirmap[scopemap[row][c &0x3]] << 28
+      dirregs[1] |= dirmap[scopemap[row][c & 0x3]] << 28
+      row = min(1,c/xboardnodes + yboardnodes*y)
+      dirregs[1] |= dirmap[memmap[row][c & 0x3]] << 24
       for k,d in enumerate(dirregs):
         print hex(dirreg+k),"=",hex(d)
       # Now throw away any links that are unconnected

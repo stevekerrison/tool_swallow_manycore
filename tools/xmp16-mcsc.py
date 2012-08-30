@@ -178,7 +178,7 @@ def initInitLinks(core):
 void __initLinks()
 {
   unsigned myid = """ + str(core) + """, jtagid= """ + str(coreToJtag[core]) + """, i;
-  unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0001002;
+  unsigned nlinks=""" + str(len(stw)) + """,tv,c,d, linksetting = 0xc0000800;
   unsigned waittime = 20000000;
   timer t;
   unsigned links[""" + str(len(stw)) + """] = {"""
@@ -192,7 +192,7 @@ void __initLinks()
   /* Zero out the link registers */
   for (i = XS1_L_SSWITCH_XLINK_0_NUM; i <= XS1_L_SSWITCH_XLINK_7_NUM; i += 1)
   {
-    write_sswitch_reg_clean(myid,i,0);
+    write_sswitch_reg_clean(myid,i,1 << 22);
   }
   /* Enable local links on the chip, between cores */
   for (i = 0x84; i < 0x88; i += 1)
