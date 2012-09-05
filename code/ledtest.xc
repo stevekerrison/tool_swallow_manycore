@@ -24,35 +24,43 @@ void dynamic_linkup(unsigned vid)
   timer t;
   xscope_register(0);
   xscope_config_io(XSCOPE_IO_BASIC);
-  read_sswitch_reg(cid,0x83,data);
   printstr("My core VID/RealID is: 0x");
   printhex(vid);
   printstr("/0x");
   printhexln(cid);
-  printstr("The link state is currently: 0x");
+  
+  read_sswitch_reg(cid,0x6,data);
+  printstr("PLL config is: 0x");
   printhexln(data);
-  write_sswitch_reg_clean(cid,0x83,0x80002004);
-  data = 0;
+  
+  read_sswitch_reg(cid,0x7,data);
+  printstr("Switch divider is: 0x");
+  printhexln(data);
+  
+  read_sswitch_reg(cid,0x8,data);
+  printstr("Ref divider is: 0x");
+  printhexln(data);
+  
+  printstrln("Enabling link hardware...");
+  write_sswitch_reg_clean(cid,0x23,0x00000010);
+  write_sswitch_reg_clean(cid,0x83,0xc0000800);
+  printstrln("Link enabled, attempting to issue credit...");
+  write_sswitch_reg_clean(cid,0x83,0xc1000800);
+  printstrln("Credit issued, now reading state... FOREVER!");
   t :> tv;
+  read_sswitch_reg(cid,0x83,data);
   while((data & 0x0e000000) != 0x06000000)
   {
+    if (data & 0x08000000)
+    {
+      printstrln("Link bad or down, giving up!");
+      return;
+    }
+    write_sswitch_reg_clean(cid,0x83,0xc1000800);
     read_sswitch_reg(cid,0x83,data);
     printstr("The link state is currently: 0x");
     printhexln(data);
-    if (data & 0x08000000)
-    {
-      write_sswitch_reg(cid,0x83,0x80002004);
-      tv += 0x04000000;
-      t when timerafter(tv) :> void;
-      write_sswitch_reg(cid,0x83,0x80002004);
-      tv += 0x04000000;
-      t when timerafter(tv) :> void;
-      write_sswitch_reg(cid,0x83,0x80802004);
-      tv += 0x04000000;
-      t when timerafter(tv) :> void;
-      write_sswitch_reg(cid,0x83,0x81002004);
-    }
-    tv += 0x04000000;
+    tv += 0x04000000;;
     t when timerafter(tv) :> void;
   }
   printstrln("Link is now up!");
@@ -66,8 +74,8 @@ void bwah(chanend c, unsigned cid)
   }
   else
   {
-    xscope_register(0);
-    xscope_config_io(XSCOPE_IO_BASIC);
+    //xscope_register(0);
+    //xscope_config_io(XSCOPE_IO_BASIC);
     c :> cid;
     printstrln("HI!");
   }
@@ -77,8 +85,8 @@ void scopetest(unsigned cid)
 {
   timer t;
   unsigned tv;
-  xscope_register(0);
-  xscope_config_io(XSCOPE_IO_BASIC);
+  //xscope_register(0);
+  //xscope_config_io(XSCOPE_IO_BASIC);
   t :> tv;
   while(1) 
   {
@@ -91,8 +99,8 @@ void scopetest(unsigned cid)
 void tokenscope(chanend ci, chanend co, unsigned cid)
 {
   unsigned t;
-  xscope_register(0);
-  xscope_config_io(XSCOPE_IO_BASIC);
+  //xscope_register(0);
+  //xscope_config_io(XSCOPE_IO_BASIC);
   if (cid == 0)
   {
     printintln(cid);

@@ -187,6 +187,17 @@ void __initLinks()
   ret += """};
   /* Make sure scratch register is clear */
   write_sswitch_reg_no_ack_clean(0,0x3,0);
+  /* Check my speed! */
+  /*read_sswitch_reg(0,0x8,tv);
+  if (tv != 4)
+  {
+    write_sswitch_reg_no_ack_clean(0,0x8,4);
+  }
+  read_sswitch_reg(0,0x6,tv);
+  if (tv != 0x01007700)
+  {
+    write_sswitch_reg_no_ack_clean(0,0x6,0x01007700);
+  }*/
   /* Set my core ID */
   write_sswitch_reg_no_ack_clean(0,XS1_L_SSWITCH_NODE_ID_NUM,myid);
   /* Zero out the link registers */

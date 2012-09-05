@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Network xmlns="http://www.xmos.com"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.xmos.com http://www.xmos.com">
+  <Type>Device</Type>
+  <Name>XMP-16 16 Core System</Name>
+
+  <Declarations>
+    <Declaration>core stdcore[16]</Declaration>
+  </Declarations>
+
+  <Packages>
+    <Package ID="0" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="0" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[0]"/>
+        </Node>
+        <Node Id="1" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[1]">
+	    <!-- LEDs are attached to L2 core 1 , port 4F{0-3} -->
+	    <Port Location="XS1_PORT_4F" Name="CORE1_LEDS"/>
+	  </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="1" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="2" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[2]"/>
+        </Node>
+        <Node Id="3" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[3]">
+            <Port Location="XS1_PORT_4F" Name="CORE3_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="2" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="4" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[4]"/>
+        </Node>
+        <Node Id="5" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[5]">
+            <Port Location="XS1_PORT_4F" Name="CORE5_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="3" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="6" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[6]"/>
+        </Node>
+        <Node Id="7" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[7]">
+            <Port Location="XS1_PORT_4F" Name="CORE7_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="4" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="8" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[8]"/>
+        </Node>
+        <Node Id="9" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[9]">
+            <Port Location="XS1_PORT_4F" Name="CORE9_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="5" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="10" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[10]"/>
+        </Node>
+        <Node Id="11" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[11]">
+            <Port Location="XS1_PORT_4F" Name="CORE11_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="6" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="12" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[12]"/>
+        </Node>
+        <Node Id="13" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[13]">
+            <Port Location="XS1_PORT_4F" Name="CORE13_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+    <Package ID="7" Type="XS1-L2A-QF124">
+      <Nodes>
+        <Node Id="14" InPackageId="0" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[14]"/>
+        </Node>
+        <Node Id="15" InPackageId="1" Type="XS1-L1A" Oscillator="25Mhz" ReferenceFrequency="125MHz" SystemFrequency="500MHz">
+          <Core Number="0" Reference="stdcore[15]">
+            <Port Location="XS1_PORT_4F" Name="CORE15_LEDS"/>
+          </Core>
+        </Node>
+      </Nodes>
+    </Package>
+
+  </Packages>
+
+
+  <JTAGChain>
+     <JTAGDevice NodeId="0"/>
+     <JTAGDevice NodeId="1"/>
+     <JTAGDevice NodeId="2"/>
+     <JTAGDevice NodeId="3"/>
+     <JTAGDevice NodeId="4"/>
+     <JTAGDevice NodeId="5"/>
+     <JTAGDevice NodeId="6"/>
+     <JTAGDevice NodeId="7"/>
+     <JTAGDevice NodeId="8"/>
+     <JTAGDevice NodeId="9"/>
+     <JTAGDevice NodeId="10"/>
+     <JTAGDevice NodeId="11"/>
+     <JTAGDevice NodeId="12"/>
+     <JTAGDevice NodeId="13"/>
+     <JTAGDevice NodeId="14"/>
+     <JTAGDevice NodeId="15"/>
+  </JTAGChain>
+ 
+</Network>
