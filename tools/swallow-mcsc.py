@@ -43,7 +43,7 @@ additional_args = sys.argv[2:]
 includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
 
 # Use XCC's preprocessor to get the code
-xc = subprocess.Popen(["xcc", "-E", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
+xc = subprocess.Popen(["xcc", "-E","-Isc_swallow_communication/module_swallow_comms/src/", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
 
 # Capture the main block
@@ -65,12 +65,12 @@ int main(void)
 //Enable dynamic AEC if we want AEC enabled even on cores that are in use
 #ifdef AEC_ON_INUSE_CORE
 #if AEC_DIVIDER_""" + str(core) + """ > 1
-  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
+  write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
   ctrl_data |= 0x30;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #elif AEC_DIVIDER > 1
-  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
+  write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
   ctrl_data |= 0x30;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
@@ -86,12 +86,12 @@ def endMain(core):
 //Enable dynamic AEC just before we free the final thread, meaning AEC is always active on this unused core
 #ifndef AEC_ON_INUSE_CORE
 #if AEC_DIVIDER_""" + str(core) + """ > 1
-  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
+  write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
   ctrl_data |= 0x30;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #elif AEC_DIVIDER > 1
-  write_pswitch_reg(""" + str(core) + """,XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
+  write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
   ctrl_data |= 0x30;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
@@ -103,11 +103,15 @@ def endMain(core):
 
 def initInitLinks(core):
   ret = ""
+  for i in includes:
+    ret += i + "\n"
   ret += """#include <stdio.h>
+#include "swallow_comms.h"
 
 /* __initLinks for core """ + str(core) + """*/
 void __initLinks()
 {
+  unsigned c;
   /* Now we declare any channels we need */
 """
   return ret
@@ -239,11 +243,7 @@ for x in chans:
   for y in sorted(chans[x]):
     inits[x] += """
   c = getChanend(swallow_cvt_chanend(""" + hex(chans[x][y]) + """));
-  asm(\"ecallf %0\"::\"r\"(c));
-  //t :> tv;
-  //t when timerafter(tv + waittime) :> void;
-  //printf("%02x: %08x\\n",myid,getRemoteChanendId(c));
-  //asm("outct res[%0],2"::"r"(c));"""
+  asm(\"ecallf %0\"::\"r\"(c));"""
 
 
 for x in mains:
@@ -261,14 +261,12 @@ print "Num cores in use:",str(len(mains))
 
 build = ""
 
-sys.exit(0)
-
 print "Now building..."
 
-cmd = shlex.split("scmake.py " + outdir + " " + str(len(coreToJtag)));
+cmd = shlex.split("scmake-swallow.py " + outdir + " " + str(mains.keys())[1:-1].replace(' ',''));
 cmd.extend(additional_args)
-cmd.extend(["-DCOREMAP=" + ','.join(map(str,coreMap)) + "," + str(len(coreToJtag))])
-subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+res = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+print res
 
 print "Done building!"
 

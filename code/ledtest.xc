@@ -12,7 +12,7 @@
 
 #include <platform.h>
 #include <stdio.h>
-#include "mcsc_chan.h"
+#include "swallow_comms.h"
 #include <xscope.h>
 #include <print.h>
 
@@ -20,10 +20,10 @@ out port leds1 = XS1_PORT_4F;
 
 void dynamic_linkup(unsigned vid)
 {
-  unsigned data, cid = coreMap[vid], tv;
+  unsigned data, cid = swallow_id(vid), tv;
   timer t;
-  xscope_register(0);
-  xscope_config_io(XSCOPE_IO_BASIC);
+  //xscope_register(0);
+  //xscope_config_io(XSCOPE_IO_BASIC);
   printstr("My core VID/RealID is: 0x");
   printhex(vid);
   printstr("/0x");
@@ -131,13 +131,13 @@ void doled(void)
 
 void switchChat(unsigned width, unsigned ncores)
 {
-  unsigned cid = get_core_id(), tv;
+  unsigned cid = get_local_tile_id(), tv;
 	int start = (cid - (width/2)) % ncores, max = (cid + (width/2) - 1) % ncores, i;
 	while(1)
 	{
 		for (i = start; i != max; i = (i + 1) % ncores)
 		{
-			read_sswitch_reg(coreMap[i],0x5,tv);
+			read_sswitch_reg(swallow_id(i),0x5,tv);
 	  }
 	}
 }
@@ -145,7 +145,7 @@ void switchChat(unsigned width, unsigned ncores)
 void checkLinks()
 {
   int i = 0x82;
-  unsigned tv, myid = get_core_id();
+  unsigned tv, myid = get_local_tile_id();
   while(1)
   {
     read_sswitch_reg(myid,i,tv);
@@ -164,14 +164,14 @@ void latencyTest(unsigned len)
 	for (i = 0; i < len; i += 2)
 	{
 		t :> tv1;
-		read_sswitch_reg(coreMap[i],0x5,tmp);
+		read_sswitch_reg(swallow_id(i),0x5,tmp);
 		t :> tv2;
 		res[i] = tv2-tv1;
 	}
 	for (i = 1; i < len; i += 2)
 	{
 		t :> tv1;
-		read_sswitch_reg(coreMap[i],0x5,tmp);
+		read_sswitch_reg(swallow_id(i),0x5,tmp);
 		t :> tv2;
 		res[i] = tv2-tv1;
 	}
@@ -262,7 +262,7 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 		t when timerafter(tv + 0x00400000) :> void;
 		cout <: b;
 		leds1 <: 0;
-		//printf("Core %d done!\n",coreMap[cid]);
+		//printf("Core %d done!\n",swallow_id(cid));
 	}
 }
 

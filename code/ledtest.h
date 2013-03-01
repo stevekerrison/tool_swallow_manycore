@@ -13,7 +13,7 @@
 #ifndef _LEDTEST_H
 #define _LEDTEST_H
 
-#include "mcsc_chan.h"
+#include "swallow_comms.h"
 
 void dynamic_linkup(unsigned vid);
 

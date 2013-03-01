@@ -8,12 +8,8 @@
  * LICENSE.txt and at <http://github.xcore.com/>
  */
 
-//Required declaration in an XMP16 multicore main before #include mcsc_chan.h!
 #include <platform.h>
 #define MCMAIN
-#include "mcsc_chan.h"
-
-//Other includes must follow mcsc_chan.h
 #include "ledtest.h"
 
 #define NCORES 16
@@ -66,10 +62,10 @@ int main(void)
     on stdcore[i]: mulkernelb();
   }*/
   
-  par
+  /*par
   {
     on stdcore[2]: dynamic_linkup(2);
-  }
+  }*/
   
   //Splat some values out of the LEDs with a token passed around
   par (int i = 0; i < (NCORES>>1); i += 2)

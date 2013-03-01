@@ -47,7 +47,7 @@ compiler tools and standard binutils to do a lot of its work.
 An SGB file starts with a magic number 0x5b followed by a version byte of 0.
 The next field "reset" is an 8-bit field, which is set to 1 if the grid
 should be reset prior to loading images (which is usually the case).
-"cores" is a 16-bit field expressing the number of cores present in the SGB file.
+"cores" is a 16-bit field expressing the number of cores used in the system, *including holes* (nodes with no image).
 "PLL" is an 8-bit field which states how many PLL settings follow (this is currently always 0 as the format for PLL
 settings is not described yet).
 
@@ -57,14 +57,15 @@ settings is not described yet).
 |    0x5b     |       0       |     0/1     | num. cores   | 0 (for now)|
 +-------------+---------------+-------------+--------------+------------+
 
-Then, for the number of cores in the image, is a section containing a 32-bit value describing how many words are in
-the image, followed by the image data.
+Then, for the number of cores in the image, is a section containing a 16-bit value describing the offset of the image
+in the grid (contiguous core reference), and how many words are inthe image as a 32-bit value, followed by the image
+data.
 
-+---------------+---------------+
-|Length (32-bit)|Image (L-words)|
-+---------------+---------------+
-|       L       |   Code        |
-+---------------+---------------+
++---------------+---------------+---------------+
+|Offset (32-bit)|Length (16-bit)|Image (L-words)|
++---------------+---------------+---------------+
+|       O       |       L       |   Code        |
++---------------+---------------+---------------+
 
 Support
 =======
