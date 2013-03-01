@@ -1,0 +1,6 @@
+conn --xscope
+load
+detach
+conn --noreset --xscope
+thread apply all set $pc = 0x10000
+continue
