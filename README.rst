@@ -62,7 +62,7 @@ in the grid (contiguous core reference), and how many words are inthe image as a
 data.
 
 +---------------+---------------+---------------+
-|Offset (32-bit)|Length (16-bit)|Image (L-words)|
+|Offset (32-bit)|Length (32-bit)|Image (L-words)|
 +---------------+---------------+---------------+
 |       O       |       L       |   Code        |
 +---------------+---------------+---------------+

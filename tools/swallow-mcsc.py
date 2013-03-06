@@ -111,7 +111,12 @@ def initInitLinks(core):
 /* __initLinks for core """ + str(core) + """*/
 void __initLinks()
 {
-  unsigned c;
+  unsigned c, sync;
+  sync = getChanend(SWXLB_BOOT_ID);
+  asm("in %0,res[%1]":"=r"(sw_nrows):"r"(sync));
+  asm("in %0,res[%1]":"=r"(sw_ncols):"r"(sync));
+  asm("chkct res[%0],1"::"r"(sync));
+  
   /* Now we declare any channels we need */
 """
   return ret
@@ -195,7 +200,7 @@ for a in allocs:
       coreChanends[core] += 1
 
 
-print "Chanends used per core:",coreChanends
+print "Chanends used per core (1 for sync) :",map(lambda(x): x + (x != 0),coreChanends)
 #print "Channel mappings:",channelMappings
 
 mains = {}
@@ -237,7 +242,7 @@ for x in channelMappings:
       chans[y] = {}
     otheridx = 1-idx
     chans[y][channelMappings[x]['chan'][idx]] = (channelMappings[x]['cores'][otheridx] << 16)  \
-        | (channelMappings[x]['chan'][otheridx] << 8) | 2;
+        | ((channelMappings[x]['chan'][otheridx] + 1) << 8) | 2;
 
 for x in chans:
   for y in sorted(chans[x]):
@@ -266,7 +271,7 @@ print "Now building..."
 cmd = shlex.split("scmake-swallow.py " + outdir + " " + str(mains.keys())[1:-1].replace(' ',''));
 cmd.extend(additional_args)
 res = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
-print res
+#print res
 
 print "Done building!"
 
