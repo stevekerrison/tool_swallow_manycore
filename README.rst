@@ -67,6 +67,8 @@ data.
 |       O       |       L       |   Code        |
 +---------------+---------------+---------------+
 
+Finally, 0xffffffff terminates the SGB file.
+
 Support
 =======
 

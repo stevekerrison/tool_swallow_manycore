@@ -112,7 +112,7 @@ def initInitLinks(core):
 void __initLinks()
 {
   unsigned c, sync;
-  sync = getChanend(SWXLB_BOOT_ID);
+  sync = getChanend((SWXLB_BOOT_ID << 16) | 0xff02);
   asm("in %0,res[%1]":"=r"(sw_nrows):"r"(sync));
   asm("in %0,res[%1]":"=r"(sw_ncols):"r"(sync));
   asm("chkct res[%0],1"::"r"(sync));

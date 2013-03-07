@@ -65,6 +65,6 @@ r = pool.map_async(compileXc, tasks)
 r.wait() # Wait on the results
 
 files = ' '.join(map(lambda(x): 'scmain_' + str(x) + '.xe',tasks))
-subprocess.Popen(shlex.split("sgb-builder.py " + str(cores) + " " + files + " " + outfile), stdout=subprocess.PIPE).communicate()[0]
+print subprocess.Popen(shlex.split("sgb-builder.py " + str(cores) + " " + files + " " + outfile), stdout=subprocess.PIPE).communicate()[0]
 
 print "Done building!"

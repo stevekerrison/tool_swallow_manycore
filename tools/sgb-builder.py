@@ -39,11 +39,13 @@ for fn in sys.argv[2:-1]:
   subprocess.Popen(shlex.split("xobjdump -s --split-dir " + td + " " + fn), stdout=subprocess.PIPE).communicate()[0]
   subprocess.Popen(shlex.split("objcopy -Ielf32-little -Obinary " + td + "/image_n0c0_2.elf " + td + "/image.bin"), stdout=subprocess.PIPE).communicate()[0]
   out.write(struct.pack('<I',cid))
-  out.write(struct.pack('<I',os.path.getsize(td + '/image.bin')))
+  print os.path.getsize(td + '/image.bin')/4
+  out.write(struct.pack('<I',os.path.getsize(td + '/image.bin')/4))
   f = open(td + '/image.bin','rb')
   out.write(f.read())
   f.close()
   
+out.wrire(struct.pack('<I',0xffffffff))
 out.close()
 	
 shutil.rmtree(td)
