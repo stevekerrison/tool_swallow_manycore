@@ -112,10 +112,11 @@ def initInitLinks(core):
 void __initLinks()
 {
   unsigned c, sync;
+  /* Grab the sync chanend first, so it's always CID 0 */
   sync = getChanend((SWXLB_BOOT_ID << 16) | 0xff02);
+  /* Get these board dimensions before anything tries to evaluate a real grid ID */
   asm("in %0,res[%1]":"=r"(sw_nrows):"r"(sync));
   asm("in %0,res[%1]":"=r"(sw_ncols):"r"(sync));
-  asm("chkct res[%0],1"::"r"(sync));
   
   /* Now we declare any channels we need */
 """
@@ -123,6 +124,8 @@ void __initLinks()
 
 def endInitLinks(core):
   return """
+  /* Do sync after all chanends are allocated. */
+  asm("chkct res[%0],1"::"r"(sync));
   return;
 }"""
   
@@ -226,7 +229,7 @@ for a in allocs:
     if ref in channelMappings:
       cidx = channelMappings[ref]['cores'].index(core)
       dst = (channelMappings[ref]['cores'][cidx] << 16)  \
-        | (channelMappings[ref]['chan'][cidx] << 8) | 2;
+        | ((channelMappings[ref]['chan'][cidx] + 1) << 8) | 2;
       mains[core] += "swallow_cvt_chanend(0x%08x)" % dst
     else:
       mains[core] += arg

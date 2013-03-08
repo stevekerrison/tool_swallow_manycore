@@ -15,6 +15,8 @@
 
 #include "swallow_comms.h"
 
+void basicTest(chanend c, unsigned id);
+
 void dynamic_linkup(unsigned vid);
 
 void scopetest(unsigned cid);

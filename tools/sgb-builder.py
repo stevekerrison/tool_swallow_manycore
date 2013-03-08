@@ -45,7 +45,7 @@ for fn in sys.argv[2:-1]:
   out.write(f.read())
   f.close()
   
-out.wrire(struct.pack('<I',0xffffffff))
+out.write(struct.pack('<I',0xffffffff))
 out.close()
 	
 shutil.rmtree(td)
