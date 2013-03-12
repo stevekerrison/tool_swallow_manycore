@@ -52,10 +52,15 @@ int main(void)
     on stdcore[(i+1)%NCORES]: commSpeed(c[i+NCORES],(i + 1) & 1);
   }*/
   
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: doled();
   }
+  
+  par
+  {
+    on stdcore[80]: doled();
+  }*/
 
   //Flash the LEDs on the appropriate cores (because not all cores have them)
   /*par (int i = 0; i < NCORES; i += 4)
@@ -65,13 +70,13 @@ int main(void)
   }*/
   
   //Fill each core's pipeline with some CPU-burning code
-  /*par (int i = 0; i < NCORES; i += 1)
+  par (int i = 0; i < NCORES; i += 1)
   {
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
     on stdcore[i]: mulkernela();
     on stdcore[i]: mulkernelb();
-  }*/
+  }
   
   /*par
   {
@@ -89,30 +94,33 @@ int main(void)
     on stdcore[48] : testb(c[0]);
   }*/
   
-  /*par (int i = 0; i < 4; i += 4)
+  /*par
   {
-    on stdcore[0]:  racetrack(c[0],c[1],0);
-    on stdcore[3]:  racetrack(c[1],c[2],3);
-    on stdcore[4]:  racetrack(c[2],c[3],4);
-    on stdcore[7]:  racetrack(c[3],c[4],7);
-    on stdcore[8]:  racetrack(c[4],c[5],8);
-    on stdcore[11]: racetrack(c[5],c[6],11);
-    on stdcore[12]: racetrack(c[6],c[7],12);
-    on stdcore[15]: racetrack(c[7],c[0],15);
+    on stdcore[0]: racetrack(c[0],c[1],0);
+    on stdcore[2]: racetrack(c[1],c[0],2);
   }*/
   
-  //Generate traffic between switches. This loads up the network a lot.
-  /*par (int i = 0; i < NCORES; i += 1)
+  par (int i = 0; i < NCORES/2 - 1; i += 1)
   {
-    on stdcore[i]: switchChat(NCORES,NCORES);
-  }*/
+    on stdcore[i*2]:  racetrack(c[i],c[i+1],i*2);
+  }
+  par (int i = NCORES-2; i < NCORES - 1; i += 1)
+  {
+    on stdcore[i]: racetrack(c[i/2],c[0],i);
+  }
+  
+  //Generate traffic between switches. This loads up the network a lot.
+  par (int i = 0; i < NCORES; i += 1)
+  {
+    on stdcore[i]: switchChat(NCORES,NCORES,i);
+  }
   
   //Generate traffic between switches. This loads up the network a lot.
   //Ideally nothing should crash or deadlock.
-  par (int i = 0; i < NCORES; i += 1)
+  /*par (int i = 0; i < NCORES; i += 1)
   {
-    on stdcore[i]: switchChat(4,NCORES);
-  }
+    on stdcore[i]: switchChat(4,NCORES,i);
+  }*/
   /*
   //Next three par{}s: Circular LED racetrack (TODO: Generalise for NCORES != 80)
   par (int i = 7; i < NCORES-4; i += 4)

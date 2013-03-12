@@ -27,7 +27,7 @@ void bwah(chanend c, unsigned cid);
 
 void doled(void);
 
-void switchChat(unsigned width, unsigned ncores);
+void switchChat(unsigned width, unsigned ncores, unsigned cid);
 
 void checkLinks();
 

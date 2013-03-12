@@ -20,7 +20,6 @@ Key Features
 To Do
 =====
 
-* XLink booting
 * Better documentation
 
 Known Issues
@@ -30,9 +29,29 @@ Known Issues
 * Debug symbols missing from final XE file
 
 Required Repositories
-================
+=====================
 
 None - tool_xesection is a submodule, however
+
+Usage
+=====
+
+#. Make sure the tools folder from this repository is in your PATH
+#. Write some code (don't use the repository - create a suitable directory structure for yourself)
+#. Write a many-core main file (an example is in the code directory - it's a bit buggy)
+#. Old style: run `xmp16-mcsc.py manycoremain.xc board.cfg [extra files] [compiler parameters]`
+ - board.cfg is a file describing the board layout, you can generate them with xmp16-routegen.py
+#. New style: `run swallow-mcsc.py manycoremain.xc [extra files] [compiler parameters]`
+ - No board.cfg needed, SGB file is produced, booting is done over TFTP, not xrun
+ 
+To TFTP:
+
+* `tftp 192.168.128.3` (or IP of the ethernet device controlling the grid)
+* `mode binary`
+* `put myfile.sgb`
+
+Running `get` on any filename will return the board configuration as the string "w,h" to the filename requested.
+
 
 .sgb File Format
 ================

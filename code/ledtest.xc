@@ -147,9 +147,9 @@ void doled(void)
 	return;
 }
 
-void switchChat(unsigned width, unsigned ncores)
+void switchChat(unsigned width, unsigned ncores, unsigned cid)
 {
-  unsigned cid = get_local_tile_id(), tv;
+  unsigned tv;
 	int start = (cid - (width/2)) % ncores, max = (cid + (width/2) - 1) % ncores, i;
 	while(1)
 	{
@@ -261,7 +261,7 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 	//printf("Chanend cin: %08x <-> %08x\n",getLocalChanendId(cin),getRemoteChanendId(cin));
 	//printf("Chanend cout: %08x <-> %08x\n",getLocalChanendId(cout),getRemoteChanendId(cout));
 	//return;
-	if (cid/* % 19*/ == 0)
+	if (cid % 19 == 0)
 	{
 		cout <: b;
 	}
@@ -275,7 +275,7 @@ void racetrack(chanend cin, chanend cout, unsigned cid)
 		}
 		leds1 <: b;
 		t :> tv;
-		t when timerafter(tv + 0x00400000) :> void;
+		t when timerafter(tv + 0x00600000) :> void;
 		cout <: b;
 		leds1 <: 0;
 		//printf("Core %d done!\n",swallow_id(cid));

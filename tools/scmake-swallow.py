@@ -52,8 +52,10 @@ else:
 
 extraargs = sys.argv[3:]
 
+scdir = os.path.dirname(os.path.realpath(__file__)) + "/../code/sc_swallow_communication/module_swallow_comms/src/"
+
 def compileXc(c):
-	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc sc_swallow_communication/module_swallow_comms/src/swallow_comms.xc sc_swallow_communication/module_swallow_comms/src/swallow_comms.S sc_swallow_communication/module_swallow_comms/src/swallow_comms_c.c XMP16-unicore.xn -Isc_swallow_communication/module_swallow_comms/src/ -fxscope"
+	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c XMP16-unicore.xn -I" + scdir + " -fxscope"
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
 	subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()
@@ -66,5 +68,14 @@ r.wait() # Wait on the results
 
 files = ' '.join(map(lambda(x): 'scmain_' + str(x) + '.xe',tasks))
 print subprocess.Popen(shlex.split("sgb-builder.py " + str(cores) + " " + files + " " + outfile), stdout=subprocess.PIPE).communicate()[0]
+
+def cleanXc(c):
+  cmd = "rm scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc"
+  ex = shlex.split(cmd)
+  subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()
+
+pool = multiprocessing.Pool(None)	
+r = pool.map_async(cleanXc, tasks)
+r.wait() # Wait on the results
 
 print "Done building!"
