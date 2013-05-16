@@ -41,7 +41,7 @@ for fn in sys.argv[2:-1]:
   out.write(struct.pack('<I',cid))
   size_bytes = os.path.getsize(td + '/image.bin')
   size_words = size_bytes/4 + size_bytes%4
-  out.write(struct.pack('<I',size_words)
+  out.write(struct.pack('<I',size_words))
   f = open(td + '/image.bin','rb')
   out.write(f.read())
   for b in range(size_bytes%4):
