@@ -31,7 +31,7 @@ Operates within $PWD
 import sys,os,re,subprocess,shlex,multiprocessing,math
 
 if len(sys.argv) < 2:
-  print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"mcmain.xc [extra compiler options & files]"
+  print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"manycoremainfile.xc [extra compiler options & files]"
   sys.exit(1)
 
 pwd = os.getcwd()
@@ -40,10 +40,12 @@ outdir = pwd + "/"
 
 additional_args = sys.argv[2:]
 
+toolsdir = os.path.dirname(sys.argv[0])
+
 includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
 
 # Use XCC's preprocessor to get the code
-xc = subprocess.Popen(["xcc", "-E","-Isc_swallow_communication/module_swallow_comms/src/", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
+xc = subprocess.Popen(["xcc", "-E","-I" + toolsdir + "/../code/sc_swallow_communication/module_swallow_comms/src/", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
 
 # Capture the main block
@@ -112,6 +114,8 @@ def initInitLinks(core):
 void __initLinks()
 {
   unsigned c, sync;
+  /* Hot-patch the I/O subroutine so that _write is replaced by _write_intercept */
+  io_redirect();
   /* Grab the sync chanend first, so it's always CID 0 */
   sync = getChanend((SWXLB_BOOT_ID << 16) | 0xff02);
   /* Get these board dimensions before anything tries to evaluate a real grid ID */
