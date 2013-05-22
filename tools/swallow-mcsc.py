@@ -28,7 +28,7 @@ is already setup by the TFTP server.
 Operates within $PWD
 """
 
-import sys,os,re,subprocess,shlex,multiprocessing,math
+import sys,os,re,subprocess,shlex,multiprocessing,math,copy
 
 if len(sys.argv) < 2:
   print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"manycoremainfile.xc [extra compiler options & files]"
@@ -213,6 +213,8 @@ print "Chanends used per core (1 for sync) :",map(lambda(x): x + (x != 0),coreCh
 mains = {}
 inits = {}
 
+channelMappingsCopy = copy.deepcopy(channelMappings)
+
 for a in allocs:
   #Simple search for "on stdcore" - only works with single-lines for now
   m = re.search("on stdcore\[(\d+)\]",a);
@@ -235,9 +237,12 @@ for a in allocs:
       dst = (channelMappings[ref]['cores'][cidx] << 16)  \
         | ((channelMappings[ref]['chan'][cidx] + 1) << 8) | 2;
       mains[core] += "swallow_cvt_chanend(0x%08x)" % dst
+      del channelMappings[ref]['cores'][cidx],channelMappings[ref]['chan'][cidx]
     else:
       mains[core] += arg
   mains[core] += ");\n"
+  
+channelMappings = channelMappingsCopy
 
 #print allocs
 #sys.exit(0)

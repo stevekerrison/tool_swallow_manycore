@@ -58,7 +58,7 @@ def compileXc(c):
 	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c XMP16-unicore.xn -I" + scdir + " -fxscope"
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
-	subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()
+	print subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()[0]
 	
 
 #Parallel build!!!
