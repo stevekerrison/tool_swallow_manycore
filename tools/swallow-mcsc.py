@@ -167,7 +167,7 @@ for x in m:
     m = re.search("\s*int\s*(.*?);(.*?);\s*(.*?)\)",replicator,re.M)
     istart,itest,istep = m.groups()
 
-  toEval = re.findall("(\[(.*?i.*?)\])",allocator);
+  toEval = re.findall("(\[([^\]]*?i[^\]]*?)\])",allocator);
 
 
   exec(istart)
@@ -253,7 +253,15 @@ for x in channelMappings:
     if y not in chans:
       chans[y] = {}
     otheridx = 1-idx
-    chans[y][channelMappings[x]['chan'][idx]] = (channelMappings[x]['cores'][otheridx] << 16)  \
+    if len(channelMappings[x]['chan']) == 1:
+      print "Warning: Channel '{0}' only used at one end, setting NULL chanend as destination".format(x)
+      chans[y][channelMappings[x]['chan'][idx]] = (channelMappings[x]['cores'][idx] << 16) | 0xff02
+    elif len(channelMappings[x]['chan']) != 2:
+      print "Error: Channel '{0}' assigned too many times (>2)".format(x)
+      print channelMappings[x]
+      sys.exit(1)
+    else:
+      chans[y][channelMappings[x]['chan'][idx]] = (channelMappings[x]['cores'][otheridx] << 16)  \
         | ((channelMappings[x]['chan'][otheridx] + 1) << 8) | 2;
 
 for x in chans:
@@ -280,7 +288,8 @@ build = ""
 
 print "Now building..."
 
-cmd = shlex.split("scmake-swallow.py " + outdir + " " + str(mains.keys())[1:-1].replace(' ',''));
+#print "scmake-swallow.py " + outdir + " " + str(sorted(mains.keys()))[1:-1].replace(' ','')
+cmd = shlex.split("scmake-swallow.py " + outdir + " " + str(sorted(mains.keys()))[1:-1].replace(' ',''));
 cmd.extend(additional_args)
 res = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
 #print res

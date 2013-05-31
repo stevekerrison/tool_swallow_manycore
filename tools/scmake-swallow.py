@@ -35,8 +35,7 @@ os.chdir(workdir)
 print "Now building..."
 build = ""
 tasks = map(int,sys.argv[2].split(','))
-cores = max(tasks) + 1
-
+cores = len(tasks)
 
 o = filter(lambda(x): re.match("-o",x),sys.argv)[:1]
 if len(o) > 0:
@@ -67,7 +66,9 @@ r = pool.map_async(compileXc, tasks)
 r.wait() # Wait on the results
 
 files = ' '.join(map(lambda(x): 'scmain_' + str(x) + '.xe',tasks))
-print subprocess.Popen(shlex.split("sgb-builder.py " + str(cores) + " " + files + " " + outfile), stdout=subprocess.PIPE).communicate()[0]
+#print "sgb-builder.py " + str(cores) + " " + files + " " + outfile
+res = subprocess.Popen(shlex.split("sgb-builder.py " + str(cores) + " " + files + " " + outfile), stdout=subprocess.PIPE).communicate()[0]
+#print res
 
 def cleanXc(c):
   cmd = "rm scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc"
