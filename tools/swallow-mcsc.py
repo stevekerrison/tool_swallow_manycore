@@ -188,7 +188,7 @@ for a in allocs:
   core = int(m.group(1))
   for c in chans:
     #Find all instances of this channel as a channend
-    m = re.findall("(?<!\w)(%s)(?!\w)(\s*\[(\d+)\])?" % c[0],a)
+    m = re.findall("(?<!\w)(%s)(?!\w)(\s*\[[\s\(]*(\d+)[\s\)]*\])?" % c[0],a[a.find("("):])
     #Fudge non-array entities
     for x in m:
       if x[2] == '':
@@ -231,7 +231,7 @@ for a in allocs:
   for arg in args:
     if mains[core][-1] != '(':
         mains[core] += ','
-    ref = re.sub("(\D)$","\g<1>0",re.sub("[\[\]]","",arg))
+    ref = re.sub("(\D)$","\g<1>0",re.sub("[\[\]\(\) ]","",arg))
     if ref in channelMappings:
       cidx = channelMappings[ref]['cores'].index(core)
       dst = (channelMappings[ref]['cores'][cidx] << 16)  \
