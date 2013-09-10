@@ -1,0 +1,6 @@
+#!/bin/bash
+# Setup the environment for the swallow tools
+
+export SWALLOW_TOOL_PATH=$(dirname $BASH_SOURCE)
+
+export PATH=$PATH:$SWALLOW_TOOL_PATH/bin:$SWALLOW_TOOL_PATH/bin/tool_xesection

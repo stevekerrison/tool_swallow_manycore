@@ -24,9 +24,21 @@ Pass other files in the additional parameters bit
 
 import sys,os,re,subprocess,shlex,multiprocessing
 
-if len(sys.argv) < 3:
-	print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"workdir coreA,coreB,...,coreXYZ [additional compiler parameters]"
+if len(sys.argv) < 4:
+	print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"workdir commslib coreA,coreB,...,coreXYZ [additional compiler parameters]"
 	sys.exit(1)
+	
+toolsdir = os.path.normpath(os.path.dirname((sys.argv[0])))
+incdir = os.path.normpath(toolsdir + '/../include')
+if not os.path.isdir(incdir):
+  print >> sys.stderr, "ERROR: Incomplete installation - no include directory!"
+  sys.exit(2)
+
+scdir = os.path.normpath(sys.argv[2]) + '/'
+if not os.path.isdir(scdir):
+  print >> sys.stderr, scdir
+  print >> sys.stderr, "ERROR: sc_swallow_communication not found!"
+  sys.exit(2)
 
 workdir = sys.argv[1]
 os.chdir(workdir)
@@ -35,7 +47,7 @@ os.chdir(workdir)
 print "Now building..."
 build = ""
 #print >> sys.stderr, sys.argv
-tasks = map(int,sys.argv[2].split(','))
+tasks = map(int,sys.argv[3].split(','))
 cores = len(tasks)
 
 o = filter(lambda(x): re.match("-o",x),sys.argv)[:1]
@@ -50,12 +62,10 @@ if len(o) > 0:
 else:
 	outfile = "a.xe"
 
-extraargs = sys.argv[3:]
-
-scdir = os.path.dirname(os.path.realpath(__file__)) + "/../code/sc_swallow_communication/module_swallow_comms/src/"
+extraargs = sys.argv[4:]
 
 def compileXc(c):
-	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c XMP16-unicore.xn -I" + scdir + " -fxscope"
+	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c " + incdir + "/XMP16-unicore.xn -I" + scdir + " -fxscope"
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
 	print subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()[0]

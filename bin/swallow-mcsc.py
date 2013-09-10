@@ -30,9 +30,25 @@ Operates within $PWD
 
 import sys,os,re,subprocess,shlex,multiprocessing,math,copy
 
+
 if len(sys.argv) < 2:
   print >> sys.stderr, "ERROR: Usage:",os.path.basename(sys.argv[0]),"manycoremainfile.xc [extra compiler options & files]"
   sys.exit(1)
+
+d = os.getcwd()
+commslib = None
+commsdir = '/sc_swallow_communication/module_swallow_comms/src'
+while d is not '/':
+  if commsdir.split('/')[1] in os.listdir(d) and os.path.isdir(d + commsdir):
+    commslib = d + commsdir
+    break
+  d = os.path.normpath(d + "/..")
+if not commslib:
+  print >> sys.stderr, \
+"""ERROR: Unable to locate sc_swallow_communication anywhere near your workspace.
+Please obtain it and put it either in or somewhere above where you're building now.
+The best place is the "root" of your workspace"""
+  sys.exit(2)
 
 pwd = os.getcwd()
 
@@ -40,12 +56,17 @@ outdir = pwd + "/"
 
 additional_args = sys.argv[2:]
 
-toolsdir = os.path.dirname(sys.argv[0])
+toolsdir = os.path.normpath(os.path.dirname((sys.argv[0])))
+incdir = os.path.normpath(toolsdir + '/../include')
+if not os.path.isdir(incdir):
+  print >> sys.stderr, "ERROR: Incomplete installation - no include directory!"
+  sys.exit(2)
 
 includes = re.findall("^(.*#.*)$",open(sys.argv[1],"r").read(),re.M)
 
 # Use XCC's preprocessor to get the code
-xc = subprocess.Popen(["xcc", "-E","-I" + toolsdir + "/../code/sc_swallow_communication/module_swallow_comms/src/", sys.argv[1], "manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
+xc = subprocess.Popen(["xcc", "-E","-I" + commslib, sys.argv[1],
+  incdir + "/manycore.xn"], stdout=subprocess.PIPE).communicate()[0]
 xc = re.sub("^#.*\n","",xc,0,re.M)
 
 # Capture the main block
@@ -289,7 +310,7 @@ build = ""
 print "Now building..."
 
 #print "scmake-swallow.py " + outdir + " " + str(sorted(mains.keys()))[1:-1].replace(' ','')
-cmd = shlex.split("scmake-swallow.py " + outdir + " " + str(sorted(mains.keys()))[1:-1].replace(' ',''));
+cmd = shlex.split("scmake-swallow.py " + outdir + " " + commslib + " " + str(sorted(mains.keys()))[1:-1].replace(' ',''));
 cmd.extend(additional_args)
 res = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
 #print res
