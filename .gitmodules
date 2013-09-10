@@ -1,6 +1,0 @@
-[submodule "tools/tool_xesection"]
-	path = tools/tool_xesection
-	url = https://github.com/stevekerrison/tool_xesection.git
-[submodule "code/sc_swallow_communication"]
-	path = code/sc_swallow_communication
-	url = git@github.com:stevekerrison/sc_swallow_communication.git

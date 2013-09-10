@@ -34,6 +34,7 @@ os.chdir(workdir)
 
 print "Now building..."
 build = ""
+#print >> sys.stderr, sys.argv
 tasks = map(int,sys.argv[2].split(','))
 cores = len(tasks)
 
