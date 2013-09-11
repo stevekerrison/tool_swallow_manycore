@@ -76,8 +76,8 @@ settings is not described yet).
 |    0x5b     |       0       |     0/1     | num. cores   | 0 (for now)|
 +-------------+---------------+-------------+--------------+------------+
 
-Then, for the number of cores in the image, is a section containing a 16-bit value describing the offset of the image
-in the grid (contiguous core reference), and how many words are inthe image as a 32-bit value, followed by the image
+Then, for the number of cores in the image, is a section containing a 32-bit value describing the offset of the image
+in the grid (contiguous core reference), and how many words are in the image as a 32-bit value, followed by the image
 data.
 
 +---------------+---------------+---------------+

@@ -18,11 +18,10 @@ int main(void)
   chan c[NCORES];
     
   //Splat some values out of the LEDs with a token passed around
-  par (int i = 0; i < (NCORES>>1); i += 2)
+  par (int i = 0; i < NCORES; i += 2)
   {
-    on stdcore[(i>>1)*4]: racetrack(c[i],c[i+1],(i>>1)*4);
-    on stdcore[((i>>1)*4)+3]: racetrack(c[i+1],c[(i+2)%(NCORES>>1)],((i>>1)*4)+3);
+    on stdcore[i]: racetrack(c[i],c[(i+2) % NCORES],i);
   }
- 
+
   return 0;
 }
