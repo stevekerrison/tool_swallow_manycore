@@ -81,6 +81,13 @@ def arrLen(s):
 
 def initMain(core):
   return "\n/* Main for core " + str(core) + """*/
+
+#if defined(AEC_FORCE_""" + str(core) + """) || defined(AEC_FORCE)
+#define AEC_VAL 0x10
+#else
+#define AEC_VAL 0x30
+#endif
+
 int main(void)
 {
   unsigned ctrl_data; //Used by AEC code, maybe
@@ -90,12 +97,14 @@ int main(void)
 #if AEC_DIVIDER_""" + str(core) + """ > 1
   write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
-  ctrl_data |= 0x30;
+  ctrl_data &= 0xffffffcf;
+  ctrl_data |= AEC_VAL;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #elif AEC_DIVIDER > 1
   write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
-  ctrl_data |= 0x30;
+  ctrl_data &= 0xffffffcf;
+  ctrl_data |= AEC_VAL;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #endif
 #endif
@@ -111,12 +120,14 @@ def endMain(core):
 #if AEC_DIVIDER_""" + str(core) + """ > 1
   write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER_""" + str(core) + """ - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
-  ctrl_data |= 0x30;
+  ctrl_data &= 0xffffffcf;
+  ctrl_data |= AEC_VAL;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #elif AEC_DIVIDER > 1
   write_pswitch_reg(swallow_id(""" + str(core) + """),XS1_PSWITCH_PLL_CLK_DIVIDER_NUM,AEC_DIVIDER - 1);
   ctrl_data = getps(XS1_PS_XCORE_CTRL0);
-  ctrl_data |= 0x30;
+  ctrl_data &= 0xffffffcf;
+  ctrl_data |= AEC_VAL;
   setps(XS1_PS_XCORE_CTRL0, ctrl_data);
 #endif
 #endif
