@@ -65,7 +65,7 @@ else:
 extraargs = sys.argv[4:]
 
 def compileXc(c):
-	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c " + incdir + "/XMP16-unicore.xn -I" + scdir + " -fxscope"
+	cmd = "xcc -o scmain_" + str(c) + ".xe scmain_" + str(c) + ".xc " + scdir + "swallow_comms.xc " + scdir + "swallow_comms.S " + scdir + "swallow_comms_c.c " + incdir + "/XMP16-unicore.xn -I" + scdir + " -fxscope -DCORE=" + str(c)
 	ex = shlex.split(cmd)
 	ex.extend(extraargs)
 	print subprocess.Popen(ex, stdout=subprocess.PIPE).communicate()[0]
