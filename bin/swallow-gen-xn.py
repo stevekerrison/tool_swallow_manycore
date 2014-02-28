@@ -137,6 +137,10 @@ class SwallowXNGenerator(object):
         d[0] = self.directions['d_left']
       else:
         d[0] = self.directions['d_right']
+      if self.pos[0] == 1:
+        d[15] = self.directions['d_left']
+      else:
+        d[15] = self.directions['d_away']
       for i in xrange(self.r_vbits):
         d[i + self.r_vpos] = self.directions['d_away']
       for i in xrange(self.r_hbits):
@@ -149,6 +153,12 @@ class SwallowXNGenerator(object):
         d[0] = self.directions['d_up']
       else:
         d[0] = self.directions['d_down']
+      if self.pos[0] == 1:
+        d[15] = self.directions['d_towards']
+      elif self.pos[0] == 0:
+        d[15] = self.directions['d_down']
+      else:
+        d[15] = self.directions['d_up']
       for i in xrange(self.r_hbits):
         d[i + self.r_hpos] = self.directions['d_towards']
       for i in xrange(self.r_vbits):
@@ -222,28 +232,24 @@ class SwallowXNGenerator(object):
         nodes = ET.Element('Nodes')
         pkg.append(nodes)
       lref = str(self.logical_ref(self.pos))
-      nref = str(self.node_ref(self.pos))
-      layer = (int(nref) >> self.r_lpos) & (2**self.r_lbits - 1)
-      node = ET.Element('Node')
+      nref = self.node_ref(self.pos)
+      layer = (nref >> self.r_lpos) & (2**self.r_lbits - 1)
+      node = ET.Element('Node',Oscillator='20MHz',SystemFrequency='500MHz',
+        ReferenceFrequency='100MHz')
       node.attrib['Id'] = lref
       node.attrib['InPackageId'] = str(ipid)
       ipid = 1 - ipid
       node.attrib['Type'] = str(self.coretype)
-      node.attrib['routingId'] = nref
-      tile = ET.Element('Tile')
-      tile.attrib['Number'] = '0'
-      tile.attrib['Reference'] = 'tile[{}]'.format(lref)
-      node.append(tile)
+      node.attrib['routingId'] = hex(nref)
+      node.append(ET.Element('Tile',Number='0',
+        Reference='tile[{}]'.format(lref)))
       rtbl = ET.Element('RoutingTable')
       node.append(rtbl)
       bits = ET.Element('Bits')
       rtbl.append(bits)
       dirbits = self.dirbits()
       for b in xrange(16):
-        bit = ET.Element('Bit')
-        bit.attrib['number'] = str(b)
-        bit.attrib['direction'] = dirbits[b]
-        bits.append(bit)
+        bits.append(ET.Element('Bit',number=str(b),direction=dirbits[b]))
       links = ET.Element('Links')
       rtbl.append(links)
       rows = self.h * self.cores_h
@@ -253,7 +259,8 @@ class SwallowXNGenerator(object):
         if (
           (self.pos[0] == 0 and not layer and l == 2) # A-links along the top
           or (self.pos[0] == rows - 1 and not layer and l == 3) # Bottom B-links
-          or (self.pos[1] == 1 and layer and l == 2) # Left A-links
+          # Left A-links
+          or (self.pos[1] == 1 and layer and l == 2 and self.pos[0] != 1)
           or (self.pos[1] == cols - 1 and layer and l == 3) # Right B-links
           ):
           continue
@@ -263,8 +270,6 @@ class SwallowXNGenerator(object):
           l,self.dirmap[layer][None] ) )
         links.append(link)
         self.physlink(l)
-        
-
       nodes.append(node)
       if ipid == 0:
         self.Packages.append(pkg)
@@ -291,6 +296,11 @@ class SwallowXNGenerator(object):
     Decls.append(Decl)
     Network.append(Decls)
     self.walkgen()
+    xscope = ET.Element('Link',Encoding='2wire',Delays='4,4',Flags='XSCOPE')
+    xscope.append(ET.Element('LinkEndpoint',Link='XLA',
+      NodeId=str(self.logical_ref((1,1)))))
+    xscope.append(ET.Element('LinkEndpoint',RoutingId="0x8000",Chanend="1"))
+    self.Links.append(xscope)
     Network.append(self.Packages)
     Network.append(self.Links)
     Network.append(self.JTAG)
