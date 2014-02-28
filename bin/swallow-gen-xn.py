@@ -74,7 +74,7 @@ class SwallowXNGenerator(object):
 
   def walk_left(self):
     """Walk along the left of the boards, back to the JTAG adapter"""
-    lpos = self.walk_bottom_path[self.walkstep]
+    lpos = self.walk_left_path[self.walkstep]
     self.pos = ( lpos[0] + (self.board[0] * self.cores_w),
       lpos[1] + (self.board[1] * self.cores_h) )
     self.walkstep += 1
