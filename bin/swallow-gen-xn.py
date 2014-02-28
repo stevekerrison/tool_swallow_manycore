@@ -133,14 +133,14 @@ class SwallowXNGenerator(object):
     else:
       d[self.r_lpos] = self.directions['d_towards']
     if layer:
-      if self.pos[1] == 0:
+      if self.pos[1] >> 1 == 0:
         d[0] = self.directions['d_left']
       else:
         d[0] = self.directions['d_right']
       for i in xrange(self.r_vbits):
         d[i + self.r_vpos] = self.directions['d_away']
       for i in xrange(self.r_hbits):
-        if (self.pos[1] >> i) & 1:
+        if (self.pos[1] >> (i+1)) & 1:
           d[i + self.r_hpos] = self.directions['d_left']
         else:
           d[i + self.r_hpos] = self.directions['d_right']
