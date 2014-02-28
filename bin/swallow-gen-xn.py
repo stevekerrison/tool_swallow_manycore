@@ -116,21 +116,85 @@ class SwallowXNGenerator(object):
       else:
         self.board = (self.board[0],self.board[1] + 1)
 
-  def dirbit(self,b):
-    d = None
-    if b == 0:
-      if self.pos[0] == 0:
-        d = 'd_up'
-      else:
-        d = 'd_down'
+  def dirbits(self):
+    """Generate the direction bits for the current node position.
+    Implementation is similar to swallow_xlinkboot
+    
+    TODO: XScope directions - old route probably invalid now, hence
+    unimplemented"""
+    d = ['0'] * 16
+    nref = self.node_ref(self.pos)
+    layer = (nref >> self.r_lpos) & (2**self.r_lbits - 1)
+    rows = self.h * self.cores_h
+    cols = self.w * self.cores_w
+    # This is a bit Swallow specific and not very programmatic at times
+    if layer:
+      d[self.r_lpos] = self.directions['d_away']
     else:
-      d = 'd_left'
-
-    return self.directions[d]
+      d[self.r_lpos] = self.directions['d_towards']
+    if layer:
+      if self.pos[1] == 0:
+        d[0] = self.directions['d_left']
+      else:
+        d[0] = self.directions['d_right']
+      for i in xrange(self.r_vbits):
+        d[i + self.r_vpos] = self.directions['d_away']
+      for i in xrange(self.r_hbits):
+        if (self.pos[1] >> i) & 1:
+          d[i + self.r_hpos] = self.directions['d_left']
+        else:
+          d[i + self.r_hpos] = self.directions['d_right']
+    else:
+      if self.pos[0] == 0:
+        d[0] = self.directions['d_up']
+      else:
+        d[0] = self.directions['d_down']
+      for i in xrange(self.r_hbits):
+        d[i + self.r_hpos] = self.directions['d_towards']
+      for i in xrange(self.r_vbits):
+        if (self.pos[0] >> i) & 1:
+          d[i + self.r_vpos] = self.directions['d_up']
+        else:
+          d[i + self.r_vpos] = self.directions['d_down']
+    return ''.join(map(str,d))
 
   def walk_jtag(self):
     """Find the next position in the JTAG chain in row/col terms"""
     self.walkmode()
+
+  def physlink(self,l):
+    """Declare the physical link properties for this node and link, if
+    necessary"""
+    nref = self.node_ref(self.pos)
+    layer = (nref >> self.r_lpos) & (2**self.r_lbits - 1)
+    if l == 2 or (l >= 4 and layer):
+      # Skip left/up links, or internal links if we're the second tile
+      return
+    if l == 3:
+      if layer:
+        neighbour = (self.pos[0],self.pos[1] + 2)
+      else:
+        neighbour = (self.pos[0] + 1, self.pos[1])
+    else:
+      neighbour = (self.pos[0], self.pos[1] + 1)
+    lphys = ET.Element('Link')
+    lphys.attrib['Encoding'] = '5wire'
+    if l >= 4:
+      #On-package links
+      lphys.attrib['Delays'] = '0,1'
+    else:
+      lphys.attrib['Delays'] = '15,15'
+    myref = self.logical_ref(self.pos)
+    neighbourref = self.logical_ref(neighbour)
+    lend1 = ET.Element('LinkEndpoint')
+    lend2 = ET.Element('LinkEndpoint')
+    lphys.append(lend1)
+    lend1.attrib['NodeId'] = str(myref)
+    lend1.attrib['Link'] = 'XL' + self.linkmap[l].upper()
+    lend2.attrib['NodeId'] = str(neighbourref)
+    lend2.attrib['Link'] = 'XL' + self.linkmap[self.linkconn[l]].upper()
+    lphys.append(lend2)
+    self.Links.append(lphys)
 
   def walkgen(self):
     """Walk the grid's JTAG chain and work out all the links, routes and IDs"""
@@ -155,6 +219,8 @@ class SwallowXNGenerator(object):
         pkg.attrib['ID'] = str(pid)
         pid += 1
         pkg.attrib['Type'] = self.package
+        nodes = ET.Element('Nodes')
+        pkg.append(nodes)
       lref = str(self.logical_ref(self.pos))
       nref = str(self.node_ref(self.pos))
       layer = (int(nref) >> self.r_lpos) & (2**self.r_lbits - 1)
@@ -167,26 +233,39 @@ class SwallowXNGenerator(object):
       tile = ET.Element('Tile')
       tile.attrib['Number'] = '0'
       tile.attrib['Reference'] = 'tile[{}]'.format(lref)
-      tile.text = ''
       node.append(tile)
       rtbl = ET.Element('RoutingTable')
       node.append(rtbl)
       bits = ET.Element('Bits')
       rtbl.append(bits)
+      dirbits = self.dirbits()
       for b in xrange(16):
         bit = ET.Element('Bit')
         bit.attrib['number'] = str(b)
-        bit.attrib['direction'] = str(self.dirbit(b))
+        bit.attrib['direction'] = dirbits[b]
         bits.append(bit)
       links = ET.Element('Links')
-      node.append(links)
+      rtbl.append(links)
+      rows = self.h * self.cores_h
+      cols = self.w * self.cores_w
       for l in xrange(2,8):
+        # Conditions in which we do not normally enable links (board edges)...
+        if (
+          (self.pos[0] == 0 and not layer and l == 2) # A-links along the top
+          or (self.pos[0] == rows - 1 and not layer and l == 3) # Bottom B-links
+          or (self.pos[1] == 1 and layer and l == 2) # Left A-links
+          or (self.pos[1] == cols - 1 and layer and l == 3) # Right B-links
+          ):
+          continue
         link = ET.Element('Link')
         link.attrib['name'] = 'XL' + self.linkmap[l].upper()
         link.attrib['direction'] = str( self.dirmap[layer].get(
           l,self.dirmap[layer][None] ) )
         links.append(link)
-      pkg.append(node)
+        self.physlink(l)
+        
+
+      nodes.append(node)
       if ipid == 0:
         self.Packages.append(pkg)
       """print "JTAG = {:03}, logical = {:03}, node = 0x{:04x}".format(
@@ -206,15 +285,15 @@ class SwallowXNGenerator(object):
       Name.text = self.name
     Name.text += " ({}w * {}h)".format(self.w,self.h)
     Network.append(Name)
-    Decls = ET.Element('Delcarations')
+    Decls = ET.Element('Declarations')
     Decl = ET.Element('Declaration')
     Decl.text = "tileref tile[{}]".format(self.total_cores)
     Decls.append(Decl)
     Network.append(Decls)
     self.walkgen()
-    Network.append(self.JTAG)
-    Network.append(self.Links)
     Network.append(self.Packages)
+    Network.append(self.Links)
+    Network.append(self.JTAG)
     return Network
 
   def __init__(self,boards_w=1,boards_h=1,name='Swallow {} tile system'):
