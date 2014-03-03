@@ -193,7 +193,7 @@ class SwallowXNGenerator(object):
       #On-package links
       lphys.attrib['Delays'] = '0,1'
     else:
-      lphys.attrib['Delays'] = '15,15'
+      lphys.attrib['Delays'] = '2,1'
     myref = self.logical_ref(self.pos)
     neighbourref = self.logical_ref(neighbour)
     lend1 = ET.Element('LinkEndpoint')
@@ -234,7 +234,7 @@ class SwallowXNGenerator(object):
       lref = str(self.logical_ref(self.pos))
       nref = self.node_ref(self.pos)
       layer = (nref >> self.r_lpos) & (2**self.r_lbits - 1)
-      node = ET.Element('Node',Oscillator='20MHz',SystemFrequency='500MHz',
+      node = ET.Element('Node',Oscillator='25MHz',SystemFrequency='500MHz',
         ReferenceFrequency='100MHz')
       node.attrib['Id'] = lref
       node.attrib['InPackageId'] = str(ipid)
