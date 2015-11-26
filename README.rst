@@ -1,4 +1,4 @@
-XMP16 Manycore tools
+Swallow Manycore tools
 .......
 
 :Version:  0.0.1
@@ -7,13 +7,13 @@ XMP16 Manycore tools
 
 :Maintainer:  https://github.com/stevekerrison
 
-:Description:  Build tools and sample code for University of Bristol "XMP16" many-core board arrays
+:Description:  Build tools and sample code for University of Bristol "Swallow" many-core board arrays
 
 
 Key Features
 ============
 
-* Allow mesh networks of XMP16s to be assembled
+* Allow mesh networks of Swallow to be assembled
 * Fast, parallel compilation of many-core code
 * Regular XMOS channel support plus a hybrid streaming channel implementation
 
@@ -39,8 +39,8 @@ Usage
 #. Make sure the tools folder from this repository is in your PATH
 #. Write some code (don't use the repository - create a suitable directory structure for yourself)
 #. Write a many-core main file (an example is in the code directory - it's a bit buggy)
-#. Old style: run `xmp16-mcsc.py manycoremain.xc board.cfg [extra files] [compiler parameters]`
- - board.cfg is a file describing the board layout, you can generate them with xmp16-routegen.py
+#. Old style: run `Swallow-mcsc.py manycoremain.xc board.cfg [extra files] [compiler parameters]`
+ - board.cfg is a file describing the board layout, you can generate them with Swallow-routegen.py
 #. New style: `run swallow-mcsc.py manycoremain.xc [extra files] [compiler parameters]`
  - No board.cfg needed, SGB file is produced, booting is done over TFTP, not xrun
  
