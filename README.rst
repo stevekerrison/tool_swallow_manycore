@@ -1,4 +1,4 @@
-XMP16 Manycore tools
+Swallow Manycore tools
 .......
 
 :Version:  0.0.1
@@ -7,13 +7,13 @@ XMP16 Manycore tools
 
 :Maintainer:  https://github.com/stevekerrison
 
-:Description:  Build tools and sample code for University of Bristol "XMP16" many-core board arrays
+:Description:  Build tools and sample code for University of Bristol "Swallow" many-core board arrays
 
 
 Key Features
 ============
 
-* Allow mesh networks of XMP16s to be assembled
+* Allow mesh networks of Swallow to be assembled
 * Fast, parallel compilation of many-core code
 * Regular XMOS channel support plus a hybrid streaming channel implementation
 
